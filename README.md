@@ -2,13 +2,13 @@
 
 > A voice-and-dictation-friendly construction proposal generator — turn a phone call's worth of rambling job notes into a clean, professional, print-ready client proposal.
 
-**[Live demo →](https://proposal-builder.crackerbox.app)**
+**[Live demo →](https://nextlevelproposal.crackerbox.app)**
 
 ![App screenshot](./docs-screenshot.png)
 
 ## What it does
 
-Proposal Builder is a step-by-step wizard for building out formal construction proposals in the field, without ever opening a word processor. Speak or type raw notes into any scope section, and AI cleans them up into professional line items automatically.
+Next Level Proposal is a step-by-step wizard for building out formal construction proposals in the field, without ever opening a word processor. Speak or type raw notes into any scope section, and AI cleans them up into professional line items automatically.
 
 - **Step-by-step wizard**: contact info → scope categories → review → print/PDF
 - **Voice dictation support** for hands-free note capture on-site
