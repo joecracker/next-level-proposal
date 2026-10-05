@@ -5,6 +5,8 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 interface Env {
   GEMINI_API_KEY?: string;
+  // Older deployments set the same key under this name; accept either.
+  AI_API_KEY?: string;
 }
 
 // Cloudflare infers the PagesFunction type at build time; we type the handler
@@ -29,7 +31,7 @@ export const onRequestPost = async ({
     }
 
     const ai = new GoogleGenAI({
-      apiKey: env.GEMINI_API_KEY,
+      apiKey: env.GEMINI_API_KEY || env.AI_API_KEY,
       httpOptions: {
         headers: {
           "User-Agent": "crackerbox-build",

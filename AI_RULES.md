@@ -41,7 +41,7 @@ There is no test framework and no ESLint/Prettier config. `npm run lint` is just
 ## Server layer (Cloudflare Pages Functions — not Nitro/Vite)
 - `functions/api/format-section.ts` → `POST /api/format-section`
 - `functions/api/parse-document.ts` → `POST /api/parse-document`
-- Both call Gemini (`@google/genai`, model `gemini-3.6-flash`, JSON response schema) using the server env var **`GEMINI_API_KEY`** — that is the name the code actually reads. `.env.example` mentions `AI_API_KEY`; that is drifted doc text, not what the handlers use.
+- Both call Gemini (`@google/genai`, model `gemini-3.6-flash`, JSON response schema) using the server env var **`GEMINI_API_KEY`**. The handlers also accept the legacy name `AI_API_KEY` (`env.GEMINI_API_KEY || env.AI_API_KEY`) for deployments set up before the doc fix; `GEMINI_API_KEY` is the name to use going forward.
 - Keep the `/api/...` paths and the `onRequestPost` export names stable; the client calls them by path (`src/components/CategoryModal.tsx`, `CategorySectionStep.tsx`, `DocxImportModal.tsx`).
 
 ## Deployment

@@ -46,7 +46,7 @@ npm install
 npm run dev
 ```
 
-Requires an `AI_API_KEY` environment variable for AI formatting to function (set in Cloudflare Pages → Settings → Environment variables — never committed to the repo).
+Requires a `GEMINI_API_KEY` environment variable for AI formatting to function (set in Cloudflare → your project → Settings → Variables and Secrets — never committed to the repo). The older name `AI_API_KEY` is still accepted, but `GEMINI_API_KEY` is preferred.
 
 ## Deployment
 
