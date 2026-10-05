@@ -13,10 +13,6 @@ export const DEFAULT_COMPANY_CONFIG: CompanyConfig = {
 
 export const DEFAULT_LEGAL_TERMS: LegalTerms = {
   agreementText: `Payment Note: Any adjustments to the contract price are to be applied toward the final balance, unless otherwise noted with a change order. Unforeseen carpentry, electrical, plumbing, heating, and cooling will be discussed with homeowner and a change order signed. Work will be figured at time and material.`,
-  paymentSchedule: `Total for all work described above: $
-Due at signing of contract: $
-Due at start of job: $
-Due upon completion of job: $`,
   dueAtSigning: "",
   dueAtStart: "",
   dueUponCompletion: "",

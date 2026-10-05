@@ -67,7 +67,7 @@ export const HowToView: React.FC = () => {
               <Settings className="w-5 h-5 text-purple-400" /> Add Your Price & Legal Terms
             </h3>
             <p className="text-slate-300 mt-2 leading-relaxed">
-              At the very end of the wizard, there's a "Legal & Payment Terms" step. This is where you punch in the total price, the deposit amount, and sign-off terms.
+              At the very end of the wizard, there's a "Legal &amp; Payment Terms" step. This is where you punch in the total estimate and the sign-off terms. The three payments split into even thirds on their own — type over any line to change it.
             </p>
           </div>
         </section>

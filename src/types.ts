@@ -24,7 +24,6 @@ export interface ScopeCategory {
 
 export interface LegalTerms {
   agreementText: string;
-  paymentSchedule: string;
   dueAtSigning?: string;
   dueAtStart?: string;
   dueUponCompletion?: string;

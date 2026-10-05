@@ -101,7 +101,7 @@ export const LegalStep: React.FC<LegalStepProps> = ({
                 type="text"
                 value={legalTerms.dueAtSigning || ''}
                 onChange={(e) => handleChange('dueAtSigning', e.target.value)}
-                placeholder="$4,850.00"
+                placeholder="$8,841.00"
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-amber-300 font-bold focus:outline-none focus:border-amber-400"
               />
             </div>
@@ -111,7 +111,7 @@ export const LegalStep: React.FC<LegalStepProps> = ({
                 type="text"
                 value={legalTerms.dueAtStart || ''}
                 onChange={(e) => handleChange('dueAtStart', e.target.value)}
-                placeholder="$21,825.00"
+                placeholder="$8,841.00"
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-400"
               />
             </div>
@@ -121,28 +121,14 @@ export const LegalStep: React.FC<LegalStepProps> = ({
                 type="text"
                 value={legalTerms.dueUponCompletion || ''}
                 onChange={(e) => handleChange('dueUponCompletion', e.target.value)}
-                placeholder="$21,825.00"
+                placeholder="$8,841.00"
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-400"
               />
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Payment Schedule */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-amber-400" />
-              Payment Schedule Breakdown
-            </label>
-            <textarea
-              value={legalTerms.paymentSchedule}
-              onChange={(e) => handleChange('paymentSchedule', e.target.value)}
-              rows={4}
-              className="w-full bg-slate-800/90 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-amber-400 transition-all leading-relaxed"
-            />
-          </div>
-
+        <div className="grid grid-cols-1 gap-4">
           {/* Warranty Terms */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
