@@ -1,23 +1,19 @@
 import React from 'react';
 import { ClientInfo } from '../types';
-import { User, MapPin, Phone, Mail, FileText, Calendar, DollarSign, Check, ArrowRight, Sparkles } from 'lucide-react';
+import { User, MapPin, Phone, Mail, FileText, Calendar, Check, ArrowRight, Sparkles } from 'lucide-react';
 
 interface ContactInfoStepProps {
   clientInfo: ClientInfo;
-  totalEstimate: string;
   notes: string;
   onChangeClientInfo: (info: ClientInfo) => void;
-  onChangeTotalEstimate: (estimate: string) => void;
   onChangeNotes: (notes: string) => void;
   onConfirmStep: () => void;
 }
 
 export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
   clientInfo,
-  totalEstimate,
   notes,
   onChangeClientInfo,
-  onChangeTotalEstimate,
   onChangeNotes,
   onConfirmStep,
 }) => {
@@ -41,7 +37,7 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
             Customer & Project Details
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Enter initial client details, project site address, and estimate totals.
+            Enter initial client details and the project site address.
           </p>
         </div>
 
@@ -128,36 +124,6 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
             value={clientInfo.projectSite}
             onChange={(e) => handleChange('projectSite', e.target.value)}
             placeholder="e.g. Main bathroom with tile shower"
-            className="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
-          />
-        </div>
-
-        {/* Total Price Estimate */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-amber-300 flex items-center gap-1.5">
-            <DollarSign className="w-3.5 h-3.5 text-amber-400" />
-            Total Estimated Investment Quote
-          </label>
-          <input
-            type="text"
-            value={totalEstimate}
-            onChange={(e) => onChangeTotalEstimate(e.target.value)}
-            placeholder="$26,523.00"
-            className="w-full bg-slate-800/90 border border-amber-500/50 rounded-xl px-3.5 py-2.5 text-sm text-amber-300 font-bold focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
-          />
-        </div>
-
-        {/* Proposal # (optional) */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-            <FileText className="w-3.5 h-3.5 text-amber-400" />
-            Proposal # <span className="text-[10px] text-slate-500 font-normal">(optional)</span>
-          </label>
-          <input
-            type="text"
-            value={clientInfo.proposalNumber}
-            onChange={(e) => handleChange('proposalNumber', e.target.value)}
-            placeholder="Optional — e.g. 2026-101"
             className="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
           />
         </div>

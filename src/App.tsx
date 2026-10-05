@@ -402,7 +402,6 @@ export default function App() {
                 {currentStepIndex === 0 && (
                   <ContactInfoStep
                     clientInfo={proposal.clientInfo}
-                    totalEstimate={proposal.totalEstimate || ''}
                     notes={proposal.notes || ''}
                     onChangeClientInfo={(info) =>
                       handleUpdateProposal({
@@ -410,9 +409,6 @@ export default function App() {
                         clientInfo: info,
                         title: info.clientName ? `${info.clientName} Proposal` : proposal.title,
                       })
-                    }
-                    onChangeTotalEstimate={(est) =>
-                      handleUpdateProposal({ ...proposal, totalEstimate: est })
                     }
                     onChangeNotes={(notesStr) =>
                       handleUpdateProposal({ ...proposal, notes: notesStr })
