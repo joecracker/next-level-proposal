@@ -1,32 +1,32 @@
 {
-  nnamen: nproposal-buildern,
-  nprivaten: true,
-  nversionn: n0.0.0n,
-  ntypen: nmodulen,
-  nscriptsn: {
-    ndevn: nviten,
-    nbuildn: nvite buildn,
-    npreviewn: nvite previewn,
-    nlintn: ntsc --noEmitn
+  "name": "next-level-proposal",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit"
   },
-  ndependenciesn: {
-    n@google/genain: n^2.4.0n,
-    n@tailwindcss/viten: n^4.1.14n,
-    n@vitejs/plugin-reactn: n^5.0.4n,
-    nlucide-reactn: n^0.546.0n,
-    nreactn: n^19.0.1n,
-    nreact-domn: n^19.0.1n,
-    nviten: n^6.2.3n,
-    nmotionn: n^12.23.24n
+  "dependencies": {
+    "@google/genai": "^2.4.0",
+    "@tailwindcss/vite": "^4.1.14",
+    "@vitejs/plugin-react": "^5.0.4",
+    "lucide-react": "^0.546.0",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "vite": "^6.2.3",
+    "motion": "^12.23.24"
   },
-  ndevDependenciesn: {
-    n@types/noden: n^22.14.0n,
-    nautoprefixern: n^10.4.21n,
-    nesbuildn: n^0.25.0n,
-    ntailwindcssn: n^4.1.14n,
-    ntsxn: n^4.21.0n,
-    ntypescriptn: n~5.8.2n,
-    nviten: n^6.2.3n,
-    n@dyad-sh/react-vite-component-taggern: n^0.9.0n
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "autoprefixer": "^10.4.21",
+    "esbuild": "^0.25.0",
+    "tailwindcss": "^4.1.14",
+    "tsx": "^4.21.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.3",
+    "@dyad-sh/react-vite-component-tagger": "^0.9.0"
   }
 }
