@@ -28,6 +28,33 @@ const STORAGE_KEY_PROPOSAL = 'jqc_active_proposal_v1';
 const STORAGE_KEY_PROPOSALS_LIST = 'jqc_proposals_list_v1';
 const STORAGE_KEY_COMPANY_PROFILE = 'pb_company_profile_v1';
 
+const formatMoney = (cents: number) =>
+  `$${(cents / 100).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
+/**
+ * Split the total estimate into three equal payments. The two early payments are
+ * exact thirds rounded down to the cent, and the leftover cents land on the final
+ * payment so the three always add back up to the total.
+ * Returns null if the typed total isn't a usable number.
+ */
+const splitIntoThirds = (estimate: string) => {
+  const cleaned = estimate.replace(/[^0-9.]/g, '');
+  const value = Number(cleaned);
+  if (!cleaned || Number.isNaN(value)) return null;
+
+  const totalCents = Math.round(value * 100);
+  const third = Math.floor(totalCents / 3);
+
+  return {
+    dueAtSigning: formatMoney(third),
+    dueAtStart: formatMoney(third),
+    dueUponCompletion: formatMoney(totalCents - third * 2),
+  };
+};
+
 export default function App() {
   const [activeModalCategory, setActiveModalCategory] = useState<ScopeCategory | null>(null);
   const [proposal, setProposal] = useState<Proposal>(() => {
@@ -443,9 +470,16 @@ export default function App() {
                     onChangeLegalTerms={(terms) =>
                       handleUpdateProposal({ ...proposal, legalTerms: terms })
                     }
-                    onChangeTotalEstimate={(estimate) =>
-                      handleUpdateProposal({ ...proposal, totalEstimate: estimate })
-                    }
+                    onChangeTotalEstimate={(estimate) => {
+                      const split = splitIntoThirds(estimate);
+                      handleUpdateProposal({
+                        ...proposal,
+                        totalEstimate: estimate,
+                        legalTerms: split
+                          ? { ...proposal.legalTerms, ...split }
+                          : proposal.legalTerms,
+                      });
+                    }}
                     onConfirmStep={() => {
                       goToStep(proposal.categories.length + 2);
                     }}

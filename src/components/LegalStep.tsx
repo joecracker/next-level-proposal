@@ -90,7 +90,7 @@ export const LegalStep: React.FC<LegalStepProps> = ({
               className="w-full sm:w-72 bg-slate-800 border-2 border-amber-500/60 rounded-lg px-4 py-3 text-lg font-black text-amber-300 focus:outline-none focus:border-amber-400 transition-all"
             />
             <p className="text-[11px] text-slate-400">
-              Prints at the bottom of the estimate, above the payment schedule. If the scope changes later, that goes through a change order.
+              Prints at the bottom of the estimate, above the payment schedule. The three payments below split into even thirds automatically — override any line by typing over it. If the scope changes later, that goes through a change order.
             </p>
           </div>
 
