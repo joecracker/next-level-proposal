@@ -46,10 +46,17 @@ export const DocxImportModal: React.FC<DocxImportModalProps> = ({
         body: JSON.stringify({ documentText }),
       });
 
-      const data = await response.json();
+      const raw = await response.text();
+      let data: any = {};
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        data = {};
+      }
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to parse document text');
+        const reason = data.details ? `${data.error}: ${data.details}` : data.error;
+        throw new Error(reason || `Server returned ${response.status}`);
       }
 
       const parsed = data.parsedData;

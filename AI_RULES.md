@@ -41,7 +41,9 @@ There is no test framework and no ESLint/Prettier config. `npm run lint` is just
 ## Server layer (Cloudflare Pages Functions — not Nitro/Vite)
 - `functions/api/format-section.ts` → `POST /api/format-section`
 - `functions/api/parse-document.ts` → `POST /api/parse-document`
-- Both call Gemini (`@google/genai`, model `gemini-3.6-flash`, JSON response schema) using the server env var **`GEMINI_API_KEY`**. The handlers also accept the legacy name `AI_API_KEY` (`env.GEMINI_API_KEY || env.AI_API_KEY`) for deployments set up before the doc fix; `GEMINI_API_KEY` is the name to use going forward.
+- Both call Gemini (`@google/genai`, JSON response schema) using the server env var **`GEMINI_API_KEY`**. The handlers also accept the legacy name `AI_API_KEY` (`env.GEMINI_API_KEY || env.AI_API_KEY`) for deployments set up before the doc fix; `GEMINI_API_KEY` is the name to use going forward.
+- Model selection is automatic: each handler holds a `MODEL_CANDIDATES` list (quality model first, cheaper/lighter ones behind it) and `generateWithFallback()` moves to the next model on a retired-model, quota, or overload error. **The list is duplicated in both handler files — keep them in sync.** Non-retryable errors (bad key, bad request) fail immediately.
+- Both handlers return `{ error, details }` on failure; the client shows both so AI failures are never opaque.
 - Keep the `/api/...` paths and the `onRequestPost` export names stable; the client calls them by path (`src/components/CategoryModal.tsx`, `CategorySectionStep.tsx`, `DocxImportModal.tsx`).
 
 ## Deployment

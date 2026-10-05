@@ -9,6 +9,41 @@ interface Env {
   AI_API_KEY?: string;
 }
 
+// Tried in order: the quality model first, tighter/cheaper ones behind it as
+// backups. If Google retires one of these, or a free-tier quota runs out, the
+// request slides to the next instead of failing outright.
+// Keep this list in sync with functions/api/parse-document.ts.
+const MODEL_CANDIDATES = [
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-2.5-flash",
+];
+
+// Worth retrying on a different model: retired or unknown model, quota, overload.
+// Anything else (a rejected key, bad request) should fail right away.
+const RETRYABLE_FAILURE =
+  /not found|not supported|unsupported|deprecated|quota|rate limit|resource_exhausted|429|404|503|overloaded|unavailable/i;
+
+type GenerateParams = Omit<Parameters<GoogleGenAI["models"]["generateContent"]>[0], "model">;
+
+async function generateWithFallback(ai: GoogleGenAI, params: GenerateParams) {
+  let lastError: unknown;
+
+  for (const model of MODEL_CANDIDATES) {
+    try {
+      return await ai.models.generateContent({ ...params, model });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      lastError = error;
+      if (!RETRYABLE_FAILURE.test(message)) throw error;
+      console.warn(`[ai] model ${model} unavailable, trying next: ${message}`);
+    }
+  }
+
+  throw lastError;
+}
+
 // Cloudflare infers the PagesFunction type at build time; we type the handler
 // args inline so local tsc and Cloudflare's bundler both accept it.
 export const onRequestPost = async ({
@@ -63,8 +98,7 @@ Return JSON in this format:
   "summary": "Brief 1-sentence summary of changes made"
 }`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
+    const response = await generateWithFallback(ai, {
       contents: prompt,
       config: {
         responseMimeType: "application/json",

@@ -70,10 +70,17 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
         }),
       });
 
-      const data = await response.json();
+      const raw = await response.text();
+      let data: any = {};
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        data = {};
+      }
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to format section');
+        const reason = data.details ? `${data.error}: ${data.details}` : data.error;
+        throw new Error(reason || `Server returned ${response.status}`);
       }
 
       if (data.formattedItems && Array.isArray(data.formattedItems)) {
