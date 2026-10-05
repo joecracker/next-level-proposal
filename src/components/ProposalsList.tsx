@@ -24,8 +24,7 @@ export const ProposalsList: React.FC<ProposalsListProps> = ({
   const filtered = savedProposals.filter(
     (p) =>
       p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.clientInfo.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.clientInfo.proposalNumber.toLowerCase().includes(searchTerm.toLowerCase())
+      p.clientInfo.clientName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -107,9 +106,6 @@ export const ProposalsList: React.FC<ProposalsListProps> = ({
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5 text-slate-500" />
                       {prop.clientInfo.proposalDate}
-                    </span>
-                    <span className="font-mono text-amber-300 font-semibold">
-                      {prop.totalEstimate || '$0.00'}
                     </span>
                   </div>
                 </div>

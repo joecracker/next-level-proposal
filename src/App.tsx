@@ -238,7 +238,7 @@ export default function App() {
       })),
       legalTerms: DEFAULT_LEGAL_TERMS,
       companyConfig: companyProfile,
-      totalEstimate: '$0.00',
+      totalEstimate: '',
       notes: '',
     };
 
@@ -439,8 +439,12 @@ export default function App() {
                 {currentStepIndex === proposal.categories.length + 1 && (
                   <LegalStep
                     legalTerms={proposal.legalTerms}
+                    totalEstimate={proposal.totalEstimate || ''}
                     onChangeLegalTerms={(terms) =>
                       handleUpdateProposal({ ...proposal, legalTerms: terms })
+                    }
+                    onChangeTotalEstimate={(estimate) =>
+                      handleUpdateProposal({ ...proposal, totalEstimate: estimate })
                     }
                     onConfirmStep={() => {
                       goToStep(proposal.categories.length + 2);

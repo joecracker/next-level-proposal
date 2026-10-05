@@ -1,17 +1,21 @@
 import React from 'react';
 import { LegalTerms } from '../types';
-import { ShieldCheck, Check, ArrowLeft, ArrowRight, FileText, Lock } from 'lucide-react';
+import { ShieldCheck, Check, ArrowLeft, ArrowRight, FileText, Lock, DollarSign } from 'lucide-react';
 
 interface LegalStepProps {
   legalTerms: LegalTerms;
+  totalEstimate: string;
   onChangeLegalTerms: (terms: LegalTerms) => void;
+  onChangeTotalEstimate: (estimate: string) => void;
   onConfirmStep: () => void;
   onPrevStep: () => void;
 }
 
 export const LegalStep: React.FC<LegalStepProps> = ({
   legalTerms,
+  totalEstimate,
   onChangeLegalTerms,
+  onChangeTotalEstimate,
   onConfirmStep,
   onPrevStep,
 }) => {
@@ -66,12 +70,31 @@ export const LegalStep: React.FC<LegalStepProps> = ({
           />
         </div>
 
-        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+        <div className="bg-slate-950 p-4 rounded-xl border border-amber-500/40 space-y-4">
           <label className="text-xs font-semibold text-amber-300 flex items-center gap-1.5">
             <FileText className="w-3.5 h-3.5 text-amber-400" />
-            Payment Schedule Specific Breakdown
+            Total Estimate &amp; Payment Schedule
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+
+          {/* Total estimate — the number the client signs off on. Nothing calculates here. */}
+          <div className="space-y-1">
+            <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5 uppercase tracking-wider">
+              <DollarSign className="w-3.5 h-3.5 text-amber-400" />
+              Total Estimate (Total for Work Described)
+            </span>
+            <input
+              type="text"
+              value={totalEstimate}
+              onChange={(e) => onChangeTotalEstimate(e.target.value)}
+              placeholder="$26,523.00"
+              className="w-full sm:w-72 bg-slate-800 border-2 border-amber-500/60 rounded-lg px-4 py-3 text-lg font-black text-amber-300 focus:outline-none focus:border-amber-400 transition-all"
+            />
+            <p className="text-[11px] text-slate-400">
+              Prints at the bottom of the estimate, above the payment schedule. If the scope changes later, that goes through a change order.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1 border-t border-slate-800">
             <div className="space-y-1">
               <span className="text-slate-400 font-medium">Due at signing of contract ($)</span>
               <input
