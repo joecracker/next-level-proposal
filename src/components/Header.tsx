@@ -2,7 +2,6 @@ import React from 'react';
 import { ViewMode, Proposal } from '../types';
 import { triggerSafePrint } from '../printUtils';
 import {
-  Mic,
   FileText,
   FolderOpen,
   FileUp,
@@ -67,8 +66,8 @@ export const Header: React.FC<HeaderProps> = ({
                   : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
               }`}
             >
-              <Mic className="w-4 h-4" />
-              <span>Step-by-Step Dictation</span>
+              <FileText className="w-4 h-4" />
+              <span>Build Proposal</span>
             </button>
 
 
@@ -162,8 +161,8 @@ export const Header: React.FC<HeaderProps> = ({
               currentView === 'wizard' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300 bg-slate-800'
             }`}
           >
-            <Mic className="w-3.5 h-3.5" />
-            <span>Dictation Wizard</span>
+            <FileText className="w-3.5 h-3.5" />
+            <span>Build Proposal</span>
           </button>
           <button
             onClick={() => setCurrentView('history')}

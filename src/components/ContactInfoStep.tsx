@@ -1,7 +1,6 @@
 import React from 'react';
 import { ClientInfo } from '../types';
-import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
-import { User, MapPin, Phone, Mail, FileText, Calendar, DollarSign, Mic, MicOff, Check, ArrowRight, Sparkles } from 'lucide-react';
+import { User, MapPin, Phone, Mail, FileText, Calendar, DollarSign, Check, ArrowRight, Sparkles } from 'lucide-react';
 
 interface ContactInfoStepProps {
   clientInfo: ClientInfo;
@@ -22,20 +21,6 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
   onChangeNotes,
   onConfirmStep,
 }) => {
-  const { isListening, transcript, startListening, stopListening, isSupported } = useSpeechRecognition();
-
-  // If dictation transcript changes, append or handle
-  const handleDictateNotes = () => {
-    if (isListening) {
-      stopListening();
-      if (transcript) {
-        onChangeNotes(notes ? `${notes}\n${transcript.trim()}` : transcript.trim());
-      }
-    } else {
-      startListening();
-    }
-  };
-
   const handleChange = (field: keyof ClientInfo, value: string) => {
     onChangeClientInfo({
       ...clientInfo,
@@ -193,34 +178,20 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
         </div>
       </div>
 
-      {/* Estimator Notes / Voice Dictation Box */}
+      {/* Estimator Notes Box */}
       <div className="space-y-2 pt-2 border-t border-slate-800">
         <div className="flex items-center justify-between">
           <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             Initial Estimator Notes & Special Client Instructions
           </label>
-
-          {isSupported && (
-            <button
-              onClick={handleDictateNotes}
-              className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                isListening
-                  ? 'bg-rose-500 text-white animate-pulse'
-                  : 'bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700'
-              }`}
-            >
-              {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-              <span>{isListening ? 'Listening... (Click Stop)' : 'Dictate Notes'}</span>
-            </button>
-          )}
         </div>
 
         <textarea
           value={notes}
           onChange={(e) => onChangeNotes(e.target.value)}
           rows={3}
-          placeholder="Talk or type initial notes about client access, special requests, estimated start window, etc."
+          placeholder="Type initial notes about client access, special requests, estimated start window, etc."
           className="w-full bg-slate-800/90 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
         />
       </div>

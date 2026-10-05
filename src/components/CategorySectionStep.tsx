@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { ScopeCategory, ScopeItem } from '../types';
-import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import {
-  Mic,
-  MicOff,
   Sparkles,
   CheckCircle2,
   Edit3,
@@ -40,26 +37,7 @@ export const CategorySectionStep: React.FC<CategorySectionStepProps> = ({
   const [isFormatting, setIsFormatting] = useState(false);
   const [formatError, setFormatError] = useState<string | null>(null);
 
-  const { isListening, transcript, startListening, stopListening, isSupported, clearTranscript } =
-    useSpeechRecognition();
-
-  // Sync dictation transcript into text box
-  React.useEffect(() => {
-    if (transcript) {
-      setDictationText((prev) => (prev ? `${prev} ${transcript}` : transcript));
-      clearTranscript();
-    }
-  }, [transcript, clearTranscript]);
-
-  const handleToggleListening = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
-    }
-  };
-
-  // Call the AI formatting endpoint to turn raw dictated thoughts into sharp line items
+  // Call the AI formatting endpoint to turn raw notes into sharp line items
   const handleAIFormat = async () => {
     if (!dictationText.trim()) return;
 
@@ -234,43 +212,20 @@ export const CategorySectionStep: React.FC<CategorySectionStepProps> = ({
         </div>
       )}
 
-      {/* Dictation Box & AI Formatter Panel */}
+      {/* Notes Box & AI Formatter Panel */}
       {!category.isConfirmed && (
         <div className="bg-slate-950/70 rounded-2xl border border-amber-500/30 p-4 sm:p-5 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-2">
               <Volume2 className="w-5 h-5 text-amber-400" />
               <h3 className="text-sm sm:text-base font-bold text-slate-100">
-                Voice Dictation & Quick Note Rattle-Off
+                Quick Notes & AI Formatting
               </h3>
             </div>
-
-            {isSupported && (
-              <button
-                onClick={handleToggleListening}
-                className={`flex items-center justify-center space-x-3 px-6 py-3 rounded-2xl text-base font-bold transition-all cursor-pointer ${
-                  isListening
-                    ? 'bg-rose-500 text-white animate-pulse shadow-lg ring-4 ring-rose-400/50'
-                    : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg hover:shadow-xl'
-                }`}
-              >
-                {isListening ? (
-                  <>
-                    <MicOff className="w-6 h-6" />
-                    <span>Stop — Done Talking</span>
-                  </>
-                ) : (
-                  <>
-                    <Mic className="w-6 h-6" />
-                    <span>Tap to Speak</span>
-                  </>
-                )}
-              </button>
-            )}
           </div>
 
           <p className="text-xs text-slate-400">
-            Speak or type what is needed for this section. Rattle off materials, quantities, dimensions, or instructions naturally—no need to say "drop down to next line".
+            Type what is needed for this section. Rattle off materials, quantities, dimensions, or instructions naturally—no need to say "drop down to next line".
           </p>
 
           <div className="relative">
@@ -281,13 +236,6 @@ export const CategorySectionStep: React.FC<CategorySectionStepProps> = ({
               placeholder="e.g. 'We need to tear out the old subfloor, install 2x6 framing studs, tape seams, put in 1/2 inch moisture drywall and haul away scrap'"
               className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
             />
-
-            {isListening && (
-              <div className="absolute top-3 right-3 flex items-center space-x-1.5 bg-rose-950/90 border border-rose-500/40 text-rose-300 text-xs px-2.5 py-1 rounded-full">
-                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-                <span>Listening live...</span>
-              </div>
-            )}
           </div>
 
           {formatError && (
@@ -343,7 +291,7 @@ export const CategorySectionStep: React.FC<CategorySectionStepProps> = ({
             <Layers className="w-8 h-8 text-slate-500 mx-auto" />
             <p className="text-sm font-medium text-slate-300">No line items in this section yet</p>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Use the voice dictation box above or type a quick line item below to add specifications to this proposal section.
+              Use the notes box above or type a quick line item below to add specifications to this proposal section.
             </p>
           </div>
         ) : (

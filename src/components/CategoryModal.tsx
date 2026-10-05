@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ScopeCategory, ScopeItem } from '../types';
-import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import {
   X,
-  Mic,
-  MicOff,
   Sparkles,
   Plus,
   Trash2,
@@ -42,29 +39,11 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   const [isFormatting, setIsFormatting] = useState(false);
   const [formatError, setFormatError] = useState<string | null>(null);
 
-  const { isListening, transcript, startListening, stopListening, isSupported, clearTranscript } =
-    useSpeechRecognition();
-
   useEffect(() => {
     setCategoryName(category.name);
     setDictationText('');
     setNewItemInput('');
   }, [category.id]);
-
-  useEffect(() => {
-    if (transcript) {
-      setDictationText((prev) => (prev ? `${prev} ${transcript}` : transcript));
-      clearTranscript();
-    }
-  }, [transcript, clearTranscript]);
-
-  const handleToggleListening = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
-    }
-  };
 
   const handleNameChange = (newName: string) => {
     setCategoryName(newName);
@@ -224,42 +203,19 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
         {/* Modal Scrollable Body */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
           
-          {/* Voice Dictation Panel */}
+          {/* Notes Panel */}
           <div className="bg-stone-900/90 rounded-2xl border border-amber-500/30 p-4 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center space-x-2">
                 <Volume2 className="w-4 h-4 text-amber-400" />
                 <h3 className="text-xs sm:text-sm font-bold text-stone-100">
-                  Voice Dictation & Fast Notes
+                  Quick Notes & AI Formatting
                 </h3>
               </div>
-
-              {isSupported && (
-                <button
-                  onClick={handleToggleListening}
-                  className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    isListening
-                      ? 'bg-rose-500 text-white animate-pulse shadow-lg ring-2 ring-rose-400'
-                      : 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-md'
-                  }`}
-                >
-                  {isListening ? (
-                    <>
-                      <MicOff className="w-3.5 h-3.5" />
-                      <span>Stop Dictating</span>
-                    </>
-                  ) : (
-                    <>
-                      <Mic className="w-3.5 h-3.5" />
-                      <span>Click to Speak Notes</span>
-                    </>
-                  )}
-                </button>
-              )}
             </div>
 
             <p className="text-xs text-stone-400">
-              Rattle off items for <strong className="text-amber-300">{category.name}</strong> naturally. AI will format it line-by-line.
+              Type the items for <strong className="text-amber-300">{category.name}</strong> naturally. AI will format it line-by-line.
             </p>
 
             <textarea
@@ -327,7 +283,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
               <div className="text-center py-6 border border-dashed border-stone-800 rounded-2xl bg-stone-900/40">
                 <p className="text-xs text-stone-400">No line items added yet.</p>
                 <p className="text-[11px] text-stone-500 mt-1">
-                  Use voice dictation above or type an item manually.
+                  Use the notes box above or type an item manually.
                 </p>
               </div>
             ) : (

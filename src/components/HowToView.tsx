@@ -1,5 +1,5 @@
 import React from 'react';
-import { HelpCircle, Mic, Printer, FileText, Settings, User } from 'lucide-react';
+import { HelpCircle, Printer, FileText, Settings, User } from 'lucide-react';
 
 export const HowToView: React.FC = () => {
   return (
@@ -26,9 +26,8 @@ export const HowToView: React.FC = () => {
               <User className="w-5 h-5 text-blue-400" /> Fill Out The Client Info
             </h3>
             <p className="text-slate-300 mt-2 leading-relaxed">
-              Start on the "Contact Info" step. Type in the client's name, address, and whatever notes you have. 
-              <strong> You can also click the microphone icon and just talk. </strong> 
-              The app will type exactly what it hears into the text box. It doesn't write the proposal for you automatically using AI—it just types out what you say.
+              Start on the "Contact Info" step. Type in the client's name, address, and whatever notes you have.
+              If typing isn't your thing, use your computer's own voice typing (on Windows: hold the <strong>Windows key</strong> and press <strong>H</strong>) and it will type into any of these boxes for you.
             </p>
           </div>
         </section>
@@ -45,8 +44,8 @@ export const HowToView: React.FC = () => {
             <div className="text-slate-300 mt-2 leading-relaxed space-y-3">
               <p>Click "Next" to go through the different categories (Demolition, Carpentry, Electrical, etc.).</p>
               <p>
-                <strong>The Magic Trick:</strong> For each category, you don't need to type out individual lines perfectly. 
-                Just click the microphone and <em>talk naturally</em>. 
+                <strong>The Magic Trick:</strong> For each category, you don't need to type out individual lines perfectly.
+                Just dump your thoughts into the notes box and <em>write it how you'd say it</em>.
                 <br/><br/>
                 For example, just rattle off: <br/>
                 <em>"We need to tear out the old subfloor, get 12 2x4s, install moisture drywall, and haul away the scrap."</em>
