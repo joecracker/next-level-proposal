@@ -247,7 +247,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4" />
-                    <span>Format with AI into Line Items</span>
+                    <span>Turn My Notes Into Proposal</span>
                   </>
                 )}
               </button>
@@ -276,14 +276,14 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
           {/* Current Line Items List */}
           <div className="space-y-2">
             <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400 border-b border-stone-800 pb-2">
-              CURRENT LINE ITEMS ({category.items.length})
+              WHAT PRINTS ON THE PROPOSAL ({category.items.length})
             </h4>
 
             {category.items.length === 0 ? (
               <div className="text-center py-6 border border-dashed border-stone-800 rounded-2xl bg-stone-900/40">
-                <p className="text-xs text-stone-400">No line items added yet.</p>
+                <p className="text-xs text-stone-400">Nothing on the proposal for this section yet.</p>
                 <p className="text-[11px] text-stone-500 mt-1">
-                  Use the notes box above or type an item manually.
+                  Use the notes box above, or write a line manually.
                 </p>
               </div>
             ) : (

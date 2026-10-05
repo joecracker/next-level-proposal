@@ -267,7 +267,7 @@ export const CategorySectionStep: React.FC<CategorySectionStepProps> = ({
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  <span>Format Thoughts Into Clean Line Items</span>
+                  <span>Turn My Notes Into Proposal</span>
                 </>
               )}
             </button>
@@ -279,7 +279,7 @@ export const CategorySectionStep: React.FC<CategorySectionStepProps> = ({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-            <span>Formatted Scope Items</span>
+            <span>What Prints On The Proposal</span>
             <span className="bg-slate-800 text-slate-300 text-xs px-2.5 py-0.5 rounded-full border border-slate-700">
               {category.items.length} item{category.items.length !== 1 ? 's' : ''}
             </span>
@@ -289,9 +289,9 @@ export const CategorySectionStep: React.FC<CategorySectionStepProps> = ({
         {category.items.length === 0 ? (
           <div className="bg-slate-800/40 border border-dashed border-slate-700 rounded-2xl p-8 text-center text-slate-400 space-y-2">
             <Layers className="w-8 h-8 text-slate-500 mx-auto" />
-            <p className="text-sm font-medium text-slate-300">No line items in this section yet</p>
+            <p className="text-sm font-medium text-slate-300">Nothing on the proposal for this section yet</p>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Use the notes box above or type a quick line item below to add specifications to this proposal section.
+              Use the notes box above, or write a line straight into the box below.
             </p>
           </div>
         ) : (
@@ -345,7 +345,7 @@ export const CategorySectionStep: React.FC<CategorySectionStepProps> = ({
               type="text"
               value={newItemInput}
               onChange={(e) => setNewItemInput(e.target.value)}
-              placeholder="+ Add a quick custom line item..."
+              placeholder="+ Write a line directly on the proposal..."
               className="flex-1 bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 transition-all"
             />
             <button
