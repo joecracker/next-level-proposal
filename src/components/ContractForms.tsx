@@ -49,6 +49,7 @@ export const ContractForms: React.FC<ContractFormsProps> = ({ proposal }) => {
   return (
     <div className="space-y-10">
       {/* ============ RIGHT TO RESCIND ============ */}
+      <PageBreak />
       <div className="printable-sheet bg-white text-slate-900 rounded-2xl shadow-2xl border border-slate-200 p-6 sm:p-10 md:p-12 max-w-4xl mx-auto font-sans print:overflow-visible print:border-none print:shadow-none print:p-0 print:m-0">
         <FormHeader companyConfig={companyConfig} />
 
