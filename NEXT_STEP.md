@@ -27,10 +27,19 @@ the thing that makes it correct instead of "probably correct."
 ## Hard rules that still apply
 - **Numbers never go to the AI.** Line-item wording only. Figures are copied from
   the workbook verbatim and never recomputed.
-- **Never write to Tim's workbook.** Test against a copy if testing is needed.
+- **Never write to the original workbook in Tim's Documents folder.** Copy it first.
+  The copy may be edited freely — columns, labels, formulas, subtotals — Tim keeps
+  backups and has cleared this.
 - The AI first pass is a convenience, not the source of truth. Tim's review wins.
 
 ## What I need before I build
 A **filled-in** workbook. The only copy we have is the blank template, and a blank
 sheet proves nothing. Any real job will do. Tim did not have to change anything
 about how he fills it in.
+
+## STATUS: PAUSED — do not start
+Separately from the workbook, the **Word proposal template we have is too thin**
+(Carpentry / Plumbing / Electrical, one bullet each). Tim is getting us a more
+descriptive template, and possibly a fully filled-out example proposal. **Wait for
+that file before building anything here.** The top-of-file "read this, then say go"
+instruction is on hold until it arrives.

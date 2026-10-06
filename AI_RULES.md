@@ -40,7 +40,9 @@ There is no test framework and no ESLint/Prettier config. `npm run lint` is just
 - Optional Google Drive backup: client-side Google Identity Services token flow, scope `drive.file` only. Client ID comes from `VITE_GOOGLE_CLIENT_ID`; target folder ID + filename are constants in `src/lib/backup.ts`. See `GOOGLE_DRIVE_SETUP.md`. Plain JSON export/import must keep working with zero setup.
 
 ## Estimating: the spreadsheet is the calculator
-Tim estimates in his own `.xlsx` workbook and **that file is the single source of truth for every number.** His workbook is never modified — no new columns, no renamed labels, no formula edits. Nothing in this app recomputes, rounds, or reformats his money.
+Tim estimates in his own `.xlsx` workbook and **that file is the single source of truth for every number.** Nothing in this app recomputes, rounds, or reformats his money.
+
+**One protected artifact: the original workbook in Tim's real Documents folder. Never open it for writing and never save over it — that is the only thing we must not touch.** Everything else is fair game. Copy the workbook and edit the copy as hard as the job needs — new columns, renamed labels, new formulas, per-section subtotals. Tim keeps separate backups and has explicitly cleared this. Work on the copy, always; the original stays pristine even so.
 
 - Flow: home screen → **Load From Excel** (`ViewMode` `estimate` → `src/components/EstimateImportModal.tsx`). Separate button and separate code path from the Word-doc importer.
 - `src/lib/excelEstimate.ts` opens the file locally in the browser (`read-excel-file/browser`), reads **every** tab, and takes whichever tab carries the summary labels.
@@ -82,4 +84,4 @@ The app is also meant to become shareable with other companies. Company name, lo
 6. **Don't replace the state-based view switching** with a router, and don't swap the Cloudflare Functions layer for Nitro/Vite server routes — the app is built around Pages Functions + Workers deploy.
 7. Preserve existing app behavior and deployment config unless the change is explicitly requested.
 8. Tailwind theming is CSS-first: theme tokens/brand aliases (`ink`, `ember`, `cream`, `muted`) live in the `@theme` block in `src/index.css`. Extend there rather than adding a `tailwind.config.js`.
-9. **Never let the app or the AI change an estimate number.** Figures are copied from Tim's workbook verbatim; polish touches wording only. And never write to his workbook — test against a copy.
+9. **Never let the app or the AI change an estimate number.** Figures are copied from Tim's workbook verbatim; polish touches wording only. **The original workbook in Tim's Documents folder is read-only forever.** Copy it first and work on the copy, which may be edited freely (Tim keeps backups).
