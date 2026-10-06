@@ -70,6 +70,12 @@ Tim estimates in his own `.xlsx` workbook and **that file is the single source o
 ## How to talk to Tim
 Tim is the app's owner and is **not a coder yet**. Explain things in plain English, skip the jargon, and define any technical term you can't avoid. Work **one thing at a time** — don't dump a pile of tasks in one go. Never say "problem" or "bug" about code you only read but never ran; say what you saw and whether you tested it.
 
+**Tim's words for the two source files — match his usage exactly:**
+- **"the excel sheet" / "the price sheet"** = the `.xlsx` estimate workbook (the calculator). Always the spreadsheet.
+- **"the proposal" / "the estimate"** = the Word document (`.docx`) the customer reads. Always a *document*, never a spreadsheet.
+
+When Tim names one, he means that one. Don't ask him to disambiguate.
+
 ## Design philosophy (Tim's — treat it as a requirement)
 **"A toddler's toy with the robot's brain."** Every screen gets big, obvious buttons a non-coder can work out with no explanation; the complexity lives underneath, where he never has to look at it. Don't surface columns, settings, or machinery he didn't ask for, and never make him understand a mechanism in order to use it. He wants to know *that* something is happening, not *how*.
 
