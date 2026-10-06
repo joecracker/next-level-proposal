@@ -1,0 +1,122 @@
+=== Summary Dashboard ===
+r2 | A:July's Quality Construction
+r3 | A:Master Project Estimate & Profit Analysi
+r5 | A:Job Name: | D:Date:
+r7 | A:Category | B:Internal Cost (Us) | C:Retail Price (Customer) | D:Profit Difference | E:Margin %
+r8 | A:Materials & Fees Total (Incl. Tax) | B:='Materials Estimate'!D31 | C:='Materials Estimate'!F31 | D:=C8-B8 | E:=IF(C8>0, D8/C8, 0)
+r9 | A:Labor Total (Standard Baseline) | B:='Labor Estimate'!D37 | C:='Labor Estimate'!F37 | D:=C9-B9 | E:=IF(C9>0, D9/C9, 0)
+r10 | A:Subcontractor Total | B:=Subs!D25 | C:=Subs!F25 | D:=C10-B10 | E:=IF(C10>0, D10/C10, 0)
+r11 | A:SUBTOTALS | B:=B8+B9+B10 | C:=C8+C9+C10 | D:=C11-B11 | E:=IF(C11>0, D11/C11, 0)
+r12 | A:Sales Commission (6%) | B:0 | C:=C11*0.06 | D:=C12-B12 | E:0.0%
+r13 | A:GRAND TOTALS | B:=B11+B12 | C:=C11+C12 | D:=C13-B13 | E:=IF(C13>0, D13/C13, 0)
+r15 | A:PAYMENT SCHEDULE
+r16 | A:Total Contract Amount | C:=C13
+r17 | A:Due at Signing (1/2 Down) | B:50% | C:=C16*0.5
+r18 | A:Due at Start of Job (1/4) | B:25% | C:=C16*0.25
+r19 | A:Due Upon Completion (1/4) | B:25% | C:=C16*0.25
+r20 | A:Payment Total (Verify) | C:=C17+C18+C19
+=== Materials Estimate ===
+r2 | A:Materials Cost Breakdown & Markup Templa | E:Tax Rate: | F:0.06
+r3 | A:Material Item | B:Qty | C:Unit Cost | D:Our Cost (+6% Tax) | E:Markup % / Fixed | F:Customer Price
+r5 | D:=IF(COUNTA(B5:C5)=2, (B5*C5)*(1+$F$2), 0 | E:0.25 | F:=IF(D5>0, D5*(1+E5), 0)
+r6 | D:=IF(COUNTA(B6:C6)=2, (B6*C6)*(1+$F$2), 0 | E:0.25 | F:=IF(D6>0, D6*(1+E6), 0)
+r7 | D:=IF(COUNTA(B7:C7)=2, (B7*C7)*(1+$F$2), 0 | E:0.25 | F:=IF(D7>0, D7*(1+E7), 0)
+r8 | D:=IF(COUNTA(B8:C8)=2, (B8*C8)*(1+$F$2), 0 | E:0.25 | F:=IF(D8>0, D8*(1+E8), 0)
+r9 | D:=IF(COUNTA(B9:C9)=2, (B9*C9)*(1+$F$2), 0 | E:0.25 | F:=IF(D9>0, D9*(1+E9), 0)
+r10 | D:=IF(COUNTA(B10:C10)=2, (B10*C10)*(1+$F$2 | E:0.25 | F:=IF(D10>0, D10*(1+E10), 0)
+r11 | D:=IF(COUNTA(B11:C11)=2, (B11*C11)*(1+$F$2 | E:0.25 | F:=IF(D11>0, D11*(1+E11), 0)
+r12 | D:=IF(COUNTA(B12:C12)=2, (B12*C12)*(1+$F$2 | E:0.25 | F:=IF(D12>0, D12*(1+E12), 0)
+r13 | D:=IF(COUNTA(B13:C13)=2, (B13*C13)*(1+$F$2 | E:0.25 | F:=IF(D13>0, D13*(1+E13), 0)
+r14 | D:=IF(COUNTA(B14:C14)=2, (B14*C14)*(1+$F$2 | E:0.25 | F:=IF(D14>0, D14*(1+E14), 0)
+r15 | D:=IF(COUNTA(B15:C15)=2, (B15*C15)*(1+$F$2 | E:0.25 | F:=IF(D15>0, D15*(1+E15), 0)
+r16 | D:=IF(COUNTA(B16:C16)=2, (B16*C16)*(1+$F$2 | E:0.25 | F:=IF(D16>0, D16*(1+E16), 0)
+r17 | D:=IF(COUNTA(B17:C17)=2, (B17*C17)*(1+$F$2 | E:0.25 | F:=IF(D17>0, D17*(1+E17), 0)
+r18 | D:=IF(COUNTA(B18:C18)=2, (B18*C18)*(1+$F$2 | E:0.25 | F:=IF(D18>0, D18*(1+E18), 0)
+r19 | D:=IF(COUNTA(B19:C19)=2, (B19*C19)*(1+$F$2 | E:0.25 | F:=IF(D19>0, D19*(1+E19), 0)
+r20 | D:=IF(COUNTA(B20:C20)=2, (B20*C20)*(1+$F$2 | E:0.25 | F:=IF(D20>0, D20*(1+E20), 0)
+r21 | D:=IF(COUNTA(B21:C21)=2, (B21*C21)*(1+$F$2 | E:0.25 | F:=IF(D21>0, D21*(1+E21), 0)
+r22 | D:=IF(COUNTA(B22:C22)=2, (B22*C22)*(1+$F$2 | E:0.25 | F:=IF(D22>0, D22*(1+E22), 0)
+r23 | D:=IF(COUNTA(B23:C23)=2, (B23*C23)*(1+$F$2 | E:0.25 | F:=IF(D23>0, D23*(1+E23), 0)
+r24 | D:=IF(COUNTA(B24:C24)=2, (B24*C24)*(1+$F$2 | E:0.25 | F:=IF(D24>0, D24*(1+E24), 0)
+r25 | D:=IF(COUNTA(B25:C25)=2, (B25*C25)*(1+$F$2 | E:0.25 | F:=IF(D25>0, D25*(1+E25), 0)
+r26 | D:=IF(COUNTA(B26:C26)=2, (B26*C26)*(1+$F$2 | E:0.25 | F:=IF(D26>0, D26*(1+E26), 0)
+r27 | D:=IF(COUNTA(B27:C27)=2, (B27*C27)*(1+$F$2 | E:0.25 | F:=IF(D27>0, D27*(1+E27), 0)
+r28 | D:=IF(COUNTA(B28:C28)=2, (B28*C28)*(1+$F$2 | E:0.25 | F:=IF(D28>0, D28*(1+E28), 0)
+r29 | D:=IF(COUNTA(B29:C29)=2, (B29*C29)*(1+$F$2 | E:0.25 | F:=IF(D29>0, D29*(1+E29), 0)
+r30 | A:Dump Fee | D:=IF(B30>0, B30*300, 0) | E:Fixed Markup | F:=IF(B30>0, B30*500, 0)
+r31 | A:Total Materials & Fees | D:=SUM(D5:D30)+SUM(D36:D45) | F:=SUM(F5:F30)+SUM(F36:F45)
+r34 | A:SHOWROOM MATERIALS (DIRECT VS RETAIL)
+r35 | A:Showroom Item Description | B:Qty | C:Direct Cost/Unit | D:Total Internal Cost (+6% Tax) | E:Showroom Retail Price/Unit | F:Customer Price | G:Profit ($)
+r36 | D:=IF(B36>0, B36*C36*1.06, 0) | F:=IF(B36>0, B36*E36, 0) | G:=F36-D36
+r37 | D:=IF(B37>0, B37*C37*1.06, 0) | F:=IF(B37>0, B37*E37, 0) | G:=F37-D37
+r38 | D:=IF(B38>0, B38*C38*1.06, 0) | F:=IF(B38>0, B38*E38, 0) | G:=F38-D38
+r39 | D:=IF(B39>0, B39*C39*1.06, 0) | F:=IF(B39>0, B39*E39, 0) | G:=F39-D39
+r40 | D:=IF(B40>0, B40*C40*1.06, 0) | F:=IF(B40>0, B40*E40, 0) | G:=F40-D40
+r41 | D:=IF(B41>0, B41*C41*1.06, 0) | F:=IF(B41>0, B41*E41, 0) | G:=F41-D41
+r42 | D:=IF(B42>0, B42*C42*1.06, 0) | F:=IF(B42>0, B42*E42, 0) | G:=F42-D42
+r43 | D:=IF(B43>0, B43*C43*1.06, 0) | F:=IF(B43>0, B43*E43, 0) | G:=F43-D43
+r44 | D:=IF(B44>0, B44*C44*1.06, 0) | F:=IF(B44>0, B44*E44, 0) | G:=F44-D44
+r45 | D:=IF(B45>0, B45*C45*1.06, 0) | F:=IF(B45>0, B45*E45, 0) | G:=F45-D45
+r46 | A:Total Showroom Profit | D:=SUM(D36:D45) | F:=SUM(F36:F45) | G:=SUM(G36:G45)
+=== Labor Estimate ===
+r2 | A:Labor Rate & Time Estimator Template | E:Standard Cost/Hr: | F:35
+r3 | E:Standard Retail/Hr: | F:75
+r4 | A:Labor Task Description | B:Hours / Qty | C:Our Rate | D:Our Total Cost | E:Retail Rate | F:Customer Total Price
+r5 | C:=$F$2 | D:=IF(B5>0, B5*C5, 0) | E:=$F$3 | F:=IF(B5>0, B5*E5, 0)
+r6 | C:=$F$2 | D:=IF(B6>0, B6*C6, 0) | E:=$F$3 | F:=IF(B6>0, B6*E6, 0)
+r7 | C:=$F$2 | D:=IF(B7>0, B7*C7, 0) | E:=$F$3 | F:=IF(B7>0, B7*E7, 0)
+r8 | C:=$F$2 | D:=IF(B8>0, B8*C8, 0) | E:=$F$3 | F:=IF(B8>0, B8*E8, 0)
+r9 | C:=$F$2 | D:=IF(B9>0, B9*C9, 0) | E:=$F$3 | F:=IF(B9>0, B9*E9, 0)
+r10 | C:=$F$2 | D:=IF(B10>0, B10*C10, 0) | E:=$F$3 | F:=IF(B10>0, B10*E10, 0)
+r11 | C:=$F$2 | D:=IF(B11>0, B11*C11, 0) | E:=$F$3 | F:=IF(B11>0, B11*E11, 0)
+r12 | C:=$F$2 | D:=IF(B12>0, B12*C12, 0) | E:=$F$3 | F:=IF(B12>0, B12*E12, 0)
+r13 | C:=$F$2 | D:=IF(B13>0, B13*C13, 0) | E:=$F$3 | F:=IF(B13>0, B13*E13, 0)
+r14 | C:=$F$2 | D:=IF(B14>0, B14*C14, 0) | E:=$F$3 | F:=IF(B14>0, B14*E14, 0)
+r15 | C:=$F$2 | D:=IF(B15>0, B15*C15, 0) | E:=$F$3 | F:=IF(B15>0, B15*E15, 0)
+r16 | C:=$F$2 | D:=IF(B16>0, B16*C16, 0) | E:=$F$3 | F:=IF(B16>0, B16*E16, 0)
+r17 | C:=$F$2 | D:=IF(B17>0, B17*C17, 0) | E:=$F$3 | F:=IF(B17>0, B17*E17, 0)
+r18 | C:=$F$2 | D:=IF(B18>0, B18*C18, 0) | E:=$F$3 | F:=IF(B18>0, B18*E18, 0)
+r19 | C:=$F$2 | D:=IF(B19>0, B19*C19, 0) | E:=$F$3 | F:=IF(B19>0, B19*E19, 0)
+r20 | C:=$F$2 | D:=IF(B20>0, B20*C20, 0) | E:=$F$3 | F:=IF(B20>0, B20*E20, 0)
+r21 | C:=$F$2 | D:=IF(B21>0, B21*C21, 0) | E:=$F$3 | F:=IF(B21>0, B21*E21, 0)
+r22 | C:=$F$2 | D:=IF(B22>0, B22*C22, 0) | E:=$F$3 | F:=IF(B22>0, B22*E22, 0)
+r23 | C:=$F$2 | D:=IF(B23>0, B23*C23, 0) | E:=$F$3 | F:=IF(B23>0, B23*E23, 0)
+r24 | C:=$F$2 | D:=IF(B24>0, B24*C24, 0) | E:=$F$3 | F:=IF(B24>0, B24*E24, 0)
+r25 | C:=$F$2 | D:=IF(B25>0, B25*C25, 0) | E:=$F$3 | F:=IF(B25>0, B25*E25, 0)
+r26 | C:=$F$2 | D:=IF(B26>0, B26*C26, 0) | E:=$F$3 | F:=IF(B26>0, B26*E26, 0)
+r27 | C:=$F$2 | D:=IF(B27>0, B27*C27, 0) | E:=$F$3 | F:=IF(B27>0, B27*E27, 0)
+r28 | C:=$F$2 | D:=IF(B28>0, B28*C28, 0) | E:=$F$3 | F:=IF(B28>0, B28*E28, 0)
+r29 | C:=$F$2 | D:=IF(B29>0, B29*C29, 0) | E:=$F$3 | F:=IF(B29>0, B29*E29, 0)
+r30 | A:3-Man Crew Premium Upgrade (Lead Carpent | C:73 | D:=IF(B30>0, B30*C30, 0) | E:120 | F:=IF(B30>0, B30*E30, 0)
+r31 | C:=$C$30 | D:=IF(B31>0, B31*C31, 0) | E:=$E$30 | F:=IF(B31>0, B31*E31, 0)
+r32 | C:=$C$30 | D:=IF(B32>0, B32*C32, 0) | E:=$E$30 | F:=IF(B32>0, B32*E32, 0)
+r33 | C:=$C$30 | D:=IF(B33>0, B33*C33, 0) | E:=$E$30 | F:=IF(B33>0, B33*E33, 0)
+r34 | C:=$C$30 | D:=IF(B34>0, B34*C34, 0) | E:=$E$30 | F:=IF(B34>0, B34*E34, 0)
+r35 | C:=$C$30 | D:=IF(B35>0, B35*C35, 0) | E:=$E$30 | F:=IF(B35>0, B35*E35, 0)
+r36 | C:=$C$30 | D:=IF(B36>0, B36*C36, 0) | E:=$E$30 | F:=IF(B36>0, B36*E36, 0)
+r37 | A:Total Labor | B:=SUM(B5:B36) | D:=SUM(D5:D36) | F:=SUM(F5:F36)
+=== Subs ===
+r1 | A:Subcontractor/Trade  | B:Qty | C:Our Direct Cost/Unit | D:Total  Internal Cost | E:Markup% | F:Customer Retail Price | G:Profit ($) 
+r2 | D:=IF(B2>0, B2*C2, 0) | E:0.4286 | F:=IF(D2>0, D2*(1+E2), 0) | G:=F2-D2
+r3 | D:=IF(B3>0, B3*C3, 0) | E:0.4286 | F:=IF(D3>0, D3*(1+E3), 0) | G:=F3-D3
+r4 | D:=IF(B4>0, B4*C4, 0) | E:0.4286 | F:=IF(D4>0, D4*(1+E4), 0) | G:=F4-D4
+r5 | D:=IF(B5>0, B5*C5, 0) | E:0.4286 | F:=IF(D5>0, D5*(1+E5), 0) | G:=F5-D5
+r6 | D:=IF(B6>0, B6*C6, 0) | E:0.4286 | F:=IF(D6>0, D6*(1+E6), 0) | G:=F6-D6
+r7 | D:=IF(B7>0, B7*C7, 0) | E:0.4286 | F:=IF(D7>0, D7*(1+E7), 0) | G:=F7-D7
+r8 | D:=IF(B8>0, B8*C8, 0) | E:0.4286 | F:=IF(D8>0, D8*(1+E8), 0) | G:=F8-D8
+r9 | D:=IF(B9>0, B9*C9, 0) | E:0.4286 | F:=IF(D9>0, D9*(1+E9), 0) | G:=F9-D9
+r10 | D:=IF(B10>0, B10*C10, 0) | E:0.4286 | F:=IF(D10>0, D10*(1+E10), 0) | G:=F10-D10
+r11 | D:=IF(B11>0, B11*C11, 0) | E:0.4286 | F:=IF(D11>0, D11*(1+E11), 0) | G:=F11-D11
+r12 | D:=IF(B12>0, B12*C12, 0) | E:0.4286 | F:=IF(D12>0, D12*(1+E12), 0) | G:=F12-D12
+r13 | D:=IF(B13>0, B13*C13, 0) | E:0.4286 | F:=IF(D13>0, D13*(1+E13), 0) | G:=F13-D13
+r14 | D:=IF(B14>0, B14*C14, 0) | E:0.4286 | F:=IF(D14>0, D14*(1+E14), 0) | G:=F14-D14
+r15 | D:=IF(B15>0, B15*C15, 0) | E:0.4286 | F:=IF(D15>0, D15*(1+E15), 0) | G:=F15-D15
+r16 | D:=IF(B16>0, B16*C16, 0) | E:0.4286 | F:=IF(D16>0, D16*(1+E16), 0) | G:=F16-D16
+r17 | D:=IF(B17>0, B17*C17, 0) | E:0.4286 | F:=IF(D17>0, D17*(1+E17), 0) | G:=F17-D17
+r18 | D:=IF(B18>0, B18*C18, 0) | E:0.4286 | F:=IF(D18>0, D18*(1+E18), 0) | G:=F18-D18
+r19 | D:=IF(B19>0, B19*C19, 0) | E:0.4286 | F:=IF(D19>0, D19*(1+E19), 0) | G:=F19-D19
+r20 | D:=IF(B20>0, B20*C20, 0) | E:0.4286 | F:=IF(D20>0, D20*(1+E20), 0) | G:=F20-D20
+r21 | D:=IF(B21>0, B21*C21, 0) | E:0.4286 | F:=IF(D21>0, D21*(1+E21), 0) | G:=F21-D21
+r22 | D:=IF(B22>0, B22*C22, 0) | E:0.4286 | F:=IF(D22>0, D22*(1+E22), 0) | G:=F22-D22
+r23 | D:=IF(B23>0, B23*C23, 0) | E:0.4286 | F:=IF(D23>0, D23*(1+E23), 0) | G:=F23-D23
+r25 | A:Total Sub Cost  | D:=SUM(D2:D23) | F:=SUM(F2:F23) | G:=SUM(G2:G23)
