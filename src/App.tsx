@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Proposal, ViewMode, ScopeCategory, CompanyConfig } from './types';
-import { SAMPLE_PROPOSAL, DEFAULT_CATEGORIES, DEFAULT_COMPANY_CONFIG, DEFAULT_LEGAL_TERMS } from './data/defaultTemplate';
+import { SAMPLE_PROPOSAL, DEFAULT_CATEGORIES, DEFAULT_COMPANY_CONFIG, DEFAULT_LEGAL_TERMS, normalizeCategories } from './data/defaultTemplate';
 import { Header } from './components/Header';
 import { Launcher } from './components/Launcher';
 import { WizardSteps } from './components/WizardSteps';
@@ -62,7 +62,9 @@ export default function App() {
         if (salvagedLogo && !parsed.companyConfig.logoUrl) {
            parsed.companyConfig.logoUrl = salvagedLogo;
         }
-        
+        // Older saves still carry ALL-CAPS section names and the old order.
+        parsed.categories = normalizeCategories(parsed.categories);
+
         // Clear dummy data
         const cn = parsed.clientInfo?.clientName || '';
         const title = parsed.title || '';
@@ -89,7 +91,8 @@ export default function App() {
           const cn = p.clientInfo?.clientName || '';
           return !title.includes('Miller') && !cn.includes('Miller') && !cn.includes('Bater') && !cn.includes('Tammy');
         });
-        if (filtered.length > 0) return filtered;
+        const normalized = filtered.map(p => ({ ...p, categories: normalizeCategories(p.categories) }));
+        if (normalized.length > 0) return normalized;
       } catch (e) {
         console.error('Failed to parse saved proposals list:', e);
       }

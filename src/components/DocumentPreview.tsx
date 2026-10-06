@@ -2,12 +2,19 @@ import React from 'react';
 import { Proposal } from '../types';
 import { Edit3 } from 'lucide-react';
 import { triggerSafePrint } from '../printUtils';
+import { formatMoneyPlain, parseMoneyToCents } from '../lib/money';
 
 interface DocumentPreviewProps {
   proposal: Proposal;
   onEditSection: (sectionIndex: number) => void;
   onOpenCategoryModal?: (category: any) => void;
 }
+
+/** A stored money string as "$ 46,901.00", or a blank to write on by hand. */
+const moneyOrBlank = (value?: string) => {
+  const cents = parseMoneyToCents(value || '');
+  return cents === null ? '$  __________' : `$ ${formatMoneyPlain(cents)}`;
+};
 
 export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   proposal,
@@ -20,6 +27,15 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   const handlePrint = () => {
     triggerSafePrint(proposal);
   };
+
+  const contactBits = [
+    companyConfig.licenseNumber,
+    companyConfig.website,
+    companyConfig.email,
+    companyConfig.phone,
+  ].filter(Boolean);
+
+  const filledCategories = categories.filter((cat) => cat.items.length > 0);
 
   return (
     <div className="space-y-6">
@@ -40,125 +56,94 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
         </button>
       </div>
 
-      {/* Printable Sheet — clean, simple, mirrors the boss's template */}
-      <div className="printable-sheet bg-white text-slate-900 rounded-2xl shadow-2xl border border-slate-200 p-6 sm:p-10 md:p-16 max-w-4xl mx-auto font-sans relative overflow-hidden print:overflow-visible print:border-none print:shadow-none print:p-0 print:m-0">
+      {/* Printable Sheet — plain, mirrors the boss's document. No colour, no rules. */}
+      <div className="printable-sheet bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 sm:p-10 md:p-16 max-w-4xl mx-auto text-[12pt] leading-[1.4] relative overflow-hidden print:overflow-visible print:border-none print:shadow-none print:p-0 print:m-0">
 
-        {/* 1. Logo & Company Header — centered, plain */}
+        {/* 1. Logo & company header — modest three lines, no banner */}
         <div className="text-center">
           {logoToDisplay ? (
-            <div className="flex justify-center mb-5">
+            <div className="flex justify-center mb-4">
               <img
                 src={logoToDisplay}
                 alt={companyConfig.companyName}
-                className="max-h-40 max-w-full object-contain"
+                className="max-h-32 max-w-full object-contain"
                 referrerPolicy="no-referrer"
               />
             </div>
           ) : null}
 
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 uppercase tracking-wide">
-            {companyConfig.companyName || 'Contractor'}
-          </h1>
-          <p className="text-sm font-semibold text-slate-800 mt-2">
-            {companyConfig.tagline ? `${companyConfig.tagline}` : ''}
-            {companyConfig.tagline && companyConfig.licenseNumber ? ' • ' : ''}
-            {companyConfig.licenseNumber || ''}
+          <p className="text-[14pt]">{companyConfig.companyName || 'Contractor'}</p>
+          {companyConfig.tagline && <p className="text-[10pt] mt-1">{companyConfig.tagline}</p>}
+          {contactBits.length > 0 && <p className="text-[10pt] mt-1">{contactBits.join('   ')}</p>}
+          {companyConfig.address && <p className="text-[10pt] mt-1">{companyConfig.address}</p>}
+        </div>
+
+        {/* 2. Customer, then the one line naming the job */}
+        <div className="mt-12">
+          <p>
+            {[clientInfo.clientName, clientInfo.address, clientInfo.phone].filter(Boolean).join('  ')}
           </p>
-          {companyConfig.address && (
-            <p className="text-sm text-slate-700 mt-0.5">{companyConfig.address}</p>
-          )}
-          {(companyConfig.phone || companyConfig.email || companyConfig.website) && (
-            <p className="text-sm text-slate-700 mt-0.5">
-              {companyConfig.phone ? `Phone:  ${companyConfig.phone}` : ''}
-              {companyConfig.phone && companyConfig.email ? ' • ' : ''}
-              {companyConfig.email ? `Email: ${companyConfig.email}` : ''}
-              {companyConfig.email && companyConfig.website ? ' • ' : ''}
-              {companyConfig.website || ''}
-            </p>
-          )}
+          <p className="font-bold mt-4">
+            work to be done: {clientInfo.projectSite || '______________________________'}
+          </p>
         </div>
 
-        {/* Thin clean rule */}
-        <div className="border-t border-slate-300 my-6 print:my-4"></div>
-
-        {/* 2. Client / Job line (clean, single line) */}
-        <div className="text-center text-sm text-slate-800 mb-6">
-          <span className="font-semibold">
-            {clientInfo.clientName ? `Prepared for  ${clientInfo.clientName}` : ''}
-            {clientInfo.clientName && clientInfo.address ? `  •  ${clientInfo.address}` : ''}
-            {!clientInfo.clientName && clientInfo.address ? clientInfo.address : ''}
-          </span>
-        </div>
-
-        {/* 3. Scope Categories — plain headings, like the template's "Carpentry:" etc. */}
-        <div className="space-y-5">
-          {categories.map((cat) => (
+        {/* 3. Scope sections — bold sentence-case heading, real bullet dots */}
+        <div className="mt-10 space-y-6">
+          {filledCategories.map((cat) => (
             <div key={cat.id} className="page-break-inside-avoid">
-              <h4 className="text-base font-bold text-slate-900">
-                {cat.name}:
-              </h4>
-              {cat.items.length > 0 ? (
-                <ul className="mt-1.5 space-y-1 list-none">
-                  {cat.items.map((item) => (
-                    <li key={item.id} className="text-sm text-slate-800 ml-5 indent-0">
-                      {item.text}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-slate-400 italic ml-5">Standard contract terms apply</p>
-              )}
+              <p className="font-bold">{cat.name}:</p>
+              <ul className="list-disc ml-8 mt-1 space-y-0.5">
+                {cat.items.map((item) => (
+                  <li key={item.id}>{item.text}</li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
 
-        {/* 4. Payment breakdown — total first, then due lines (as on the paper) */}
-        <div className="mt-7 space-y-1.5 text-sm page-break-inside-avoid">
-          <p className="font-semibold text-slate-900">
-            Total for work described above: {totalEstimate ? ` $${totalEstimate.replace('$', '')}` : '$  __________'}
-          </p>
-          <p className="text-slate-800">
-            Due at signing of contract: {legalTerms.dueAtSigning ? ` $${legalTerms.dueAtSigning.replace('$', '')}` : '$  __________'}
-          </p>
-          <p className="text-slate-800">
-            Due at start of job: {legalTerms.dueAtStart ? ` $${legalTerms.dueAtStart.replace('$', '')}` : '$  __________'}
-          </p>
-          <p className="text-slate-800">
-            Due on completion of job: {legalTerms.dueUponCompletion ? ` $${legalTerms.dueUponCompletion.replace('$', '')}` : '$  __________'}
-          </p>
+        {/* 4. Money block — labels left, figures in one right-hand column */}
+        <div className="mt-10 grid grid-cols-[1fr_auto] gap-y-1 gap-x-6 max-w-[560px] page-break-inside-avoid">
+          <span>Total for all work described above:</span>
+          <span className="text-right">{moneyOrBlank(totalEstimate)}</span>
+          <span>Due at signing of contract:</span>
+          <span className="text-right">{moneyOrBlank(legalTerms.dueAtSigning)}</span>
+          <span>Due at start of job:</span>
+          <span className="text-right">{moneyOrBlank(legalTerms.dueAtStart)}</span>
+          <span>Due upon completion of job:</span>
+          <span className="text-right">{moneyOrBlank(legalTerms.dueUponCompletion)}</span>
         </div>
 
-        {/* 5. Estimator notes (only if filled) */}
+        {/* 5. Special note (only when there is one) */}
         {notes && (
-          <div className="mt-5 page-break-inside-avoid">
-            <p className="text-sm text-slate-800 italic leading-relaxed whitespace-pre-line">
-              {notes}
-            </p>
+          <div className="mt-10 page-break-inside-avoid">
+            <p className="font-bold">Special note:</p>
+            <p className="mt-1 whitespace-pre-line">{notes}</p>
           </div>
         )}
 
-        {/* 6. Payment notes / legal statement — solid, unchanged */}
-        <div className="mt-6 text-sm text-slate-800 leading-relaxed page-break-inside-avoid">
-          <p>
-            {legalTerms.agreementText}
-          </p>
-        </div>
+        {/* 6. Payment note / legal statement */}
+        {legalTerms.agreementText && (
+          <div className="mt-6 page-break-inside-avoid">
+            <p>{legalTerms.agreementText}</p>
+          </div>
+        )}
 
-        {/* 7. Signature block — two signature lines */}
-        <div className="mt-12 pt-6 border-t border-slate-300 page-break-inside-avoid">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
-            {/* Contractor */}
+        {/* 7. Signature block — plain underscores, captions below, no ruled lines */}
+        <div className="mt-16 page-break-inside-avoid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-16 gap-y-10">
             <div>
-              <div className="border-b border-slate-800 h-10"></div>
-              <p className="text-xs font-semibold text-slate-800 mt-1">
-                Contractor signature: ______________________ &nbsp;&nbsp; Date: ________
+              <p>_________________________________</p>
+              <p className="mt-1 flex justify-between max-w-[21rem]">
+                <span>Contractor signature</span>
+                <span>Date</span>
               </p>
             </div>
-            {/* Customer */}
             <div>
-              <div className="border-b border-slate-800 h-10"></div>
-              <p className="text-xs font-semibold text-slate-800 mt-1">
-                Customer signature: ______________________ &nbsp;&nbsp; Date: ________
+              <p>_________________________________</p>
+              <p className="mt-1 flex justify-between max-w-[21rem]">
+                <span>Customer signature</span>
+                <span>Date</span>
               </p>
             </div>
           </div>
