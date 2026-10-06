@@ -57,4 +57,12 @@ export interface Proposal {
   notes?: string;
 }
 
-export type ViewMode = 'home' | 'wizard' | 'preview' | 'history' | 'import' | 'settings' | 'howto';
+export type ViewMode =
+  | 'home'
+  | 'wizard'
+  | 'preview'
+  | 'history'
+  | 'import'
+  | 'estimate'
+  | 'settings'
+  | 'howto';

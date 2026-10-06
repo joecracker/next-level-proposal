@@ -118,13 +118,13 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
             Total for work described above: {totalEstimate ? ` $${totalEstimate.replace('$', '')}` : '$  __________'}
           </p>
           <p className="text-slate-800">
-            Due at signing of contract: {legalTerms.dueAtSigning ? ` $${legalTerms.dueAtSigning}` : '$  __________'}
+            Due at signing of contract: {legalTerms.dueAtSigning ? ` $${legalTerms.dueAtSigning.replace('$', '')}` : '$  __________'}
           </p>
           <p className="text-slate-800">
-            Due at start of job: {legalTerms.dueAtStart ? ` $${legalTerms.dueAtStart}` : '$  __________'}
+            Due at start of job: {legalTerms.dueAtStart ? ` $${legalTerms.dueAtStart.replace('$', '')}` : '$  __________'}
           </p>
           <p className="text-slate-800">
-            Due on completion of job: {legalTerms.dueUponCompletion ? ` $${legalTerms.dueUponCompletion}` : '$  __________'}
+            Due on completion of job: {legalTerms.dueUponCompletion ? ` $${legalTerms.dueUponCompletion.replace('$', '')}` : '$  __________'}
           </p>
         </div>
 

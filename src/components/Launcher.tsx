@@ -1,10 +1,11 @@
 import React from 'react';
-import { FileText, FolderOpen, Settings, HelpCircle, ClipboardPen } from 'lucide-react';
+import { FileText, FolderOpen, Settings, HelpCircle, ClipboardPen, FileSpreadsheet } from 'lucide-react';
 
 interface LauncherProps {
   hasExistingDraft: boolean;
   onNewProposal: () => void;
   onContinueDraft: () => void;
+  onLoadFromExcel: () => void;
   onOpenPast: () => void;
   onCompanyProfile: () => void;
   onHowTo: () => void;
@@ -14,6 +15,7 @@ export const Launcher: React.FC<LauncherProps> = ({
   hasExistingDraft,
   onNewProposal,
   onContinueDraft,
+  onLoadFromExcel,
   onOpenPast,
   onCompanyProfile,
   onHowTo,
@@ -62,6 +64,19 @@ export const Launcher: React.FC<LauncherProps> = ({
           <span>
             New Proposal
             <div className={`${sub} text-slate-700`}>Start a fresh proposal from scratch</div>
+          </span>
+        </button>
+
+        <button
+          onClick={onLoadFromExcel}
+          className={`${door} border-amber-500/60 bg-amber-500/10 hover:bg-amber-500/20 text-slate-100`}
+        >
+          <span className="text-3xl w-10 text-center shrink-0">
+            <FileSpreadsheet className="w-9 h-9 text-amber-400 mx-auto" />
+          </span>
+          <span>
+            Load From Excel
+            <div className={sub}>Read the job numbers off your estimate sheet</div>
           </span>
         </button>
 

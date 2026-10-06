@@ -17,43 +17,18 @@ import { DocumentPreview } from './components/DocumentPreview';
 import { ContractForms } from './components/ContractForms';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { DocxImportModal } from './components/DocxImportModal';
+import { EstimateImportModal, EstimateImportResult } from './components/EstimateImportModal';
 import { LogoUploadModal } from './components/LogoUploadModal';
 import { ProposalsList } from './components/ProposalsList';
 import { CategoryModal } from './components/CategoryModal';
 import { HowToView } from './components/HowToView';
 import { BackupMenu } from './components/BackupMenu';
 import { triggerSafePrint } from './printUtils';
+import { splitPaymentSchedule } from './lib/money';
 
 const STORAGE_KEY_PROPOSAL = 'jqc_active_proposal_v1';
 const STORAGE_KEY_PROPOSALS_LIST = 'jqc_proposals_list_v1';
 const STORAGE_KEY_COMPANY_PROFILE = 'pb_company_profile_v1';
-
-const formatMoney = (cents: number) =>
-  `$${(cents / 100).toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-
-/**
- * Split the total estimate into three equal payments. The two early payments are
- * exact thirds rounded down to the cent, and the leftover cents land on the final
- * payment so the three always add back up to the total.
- * Returns null if the typed total isn't a usable number.
- */
-const splitIntoThirds = (estimate: string) => {
-  const cleaned = estimate.replace(/[^0-9.]/g, '');
-  const value = Number(cleaned);
-  if (!cleaned || Number.isNaN(value)) return null;
-
-  const totalCents = Math.round(value * 100);
-  const third = Math.floor(totalCents / 3);
-
-  return {
-    dueAtSigning: formatMoney(third),
-    dueAtStart: formatMoney(third),
-    dueUponCompletion: formatMoney(totalCents - third * 2),
-  };
-};
 
 export default function App() {
   const [activeModalCategory, setActiveModalCategory] = useState<ScopeCategory | null>(null);
@@ -383,6 +358,7 @@ export default function App() {
               setMaxReachedStep(Math.max(maxReachedStep, currentStepIndex));
               setCurrentView('wizard');
             }}
+            onLoadFromExcel={() => setCurrentView('estimate')}
             onOpenPast={() => setCurrentView('history')}
             onCompanyProfile={() => setCurrentView('settings')}
             onHowTo={() => setCurrentView('howto')}
@@ -471,7 +447,7 @@ export default function App() {
                       handleUpdateProposal({ ...proposal, legalTerms: terms })
                     }
                     onChangeTotalEstimate={(estimate) => {
-                      const split = splitIntoThirds(estimate);
+                      const split = splitPaymentSchedule(estimate);
                       handleUpdateProposal({
                         ...proposal,
                         totalEstimate: estimate,
@@ -553,6 +529,31 @@ export default function App() {
               setCurrentView('wizard');
             }}
             onClose={() => setCurrentView('wizard')}
+          />
+        )}
+
+        {/* VIEW 4B: LOAD THE JOB NUMBERS FROM THE EXCEL ESTIMATE SHEET */}
+        {currentView === 'estimate' && (
+          <EstimateImportModal
+            currentTotal={proposal.totalEstimate || ''}
+            onApply={(result: EstimateImportResult) => {
+              handleUpdateProposal({
+                ...proposal,
+                totalEstimate: result.totalEstimate,
+                clientInfo: result.jobName
+                  ? { ...proposal.clientInfo, projectSite: result.jobName }
+                  : proposal.clientInfo,
+                legalTerms: {
+                  ...proposal.legalTerms,
+                  dueAtSigning: result.dueAtSigning,
+                  dueAtStart: result.dueAtStart,
+                  dueUponCompletion: result.dueUponCompletion,
+                },
+              });
+              setCurrentView('wizard');
+              goToStep(proposal.categories.length + 1);
+            }}
+            onClose={() => setCurrentView('home')}
           />
         )}
 

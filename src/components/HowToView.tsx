@@ -67,7 +67,10 @@ export const HowToView: React.FC = () => {
               <Settings className="w-5 h-5 text-purple-400" /> Add Your Price & Legal Terms
             </h3>
             <p className="text-slate-300 mt-2 leading-relaxed">
-              At the very end of the wizard, there's a "Legal &amp; Payment Terms" step. This is where you punch in the total estimate and the sign-off terms. The three payments split into even thirds on their own — type over any line to change it.
+              At the very end of the wizard, there's a "Legal &amp; Payment Terms" step. This is where you punch in the total estimate and the sign-off terms. The payments fill in on their own as half at signing, then a quarter at the start of the job and a quarter on completion — type over any line to change it.
+            </p>
+            <p className="text-slate-300 mt-2 leading-relaxed">
+              Don't feel like typing the numbers? On the opening screen there's a <strong>Load From Excel</strong> button. Drop in your saved estimate sheet and the total and payment schedule come across exactly as they are in the sheet. Your spreadsheet is never changed, and the numbers are never rewritten or recalculated by the app.
             </p>
           </div>
         </section>

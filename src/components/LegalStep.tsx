@@ -90,7 +90,7 @@ export const LegalStep: React.FC<LegalStepProps> = ({
               className="w-full sm:w-72 bg-slate-800 border-2 border-amber-500/60 rounded-lg px-4 py-3 text-lg font-black text-amber-300 focus:outline-none focus:border-amber-400 transition-all"
             />
             <p className="text-[11px] text-slate-400">
-              Prints at the bottom of the estimate, above the payment schedule. The three payments below split into even thirds automatically — override any line by typing over it. If the scope changes later, that goes through a change order.
+              Prints at the bottom of the estimate, above the payment schedule. The three payments below fill in as half at signing, then a quarter at the start of the job and a quarter on completion — override any line by typing over it. If the scope changes later, that goes through a change order.
             </p>
           </div>
 
@@ -101,7 +101,7 @@ export const LegalStep: React.FC<LegalStepProps> = ({
                 type="text"
                 value={legalTerms.dueAtSigning || ''}
                 onChange={(e) => handleChange('dueAtSigning', e.target.value)}
-                placeholder="$8,841.00"
+                placeholder="$13,261.50"
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-amber-300 font-bold focus:outline-none focus:border-amber-400"
               />
             </div>
@@ -111,7 +111,7 @@ export const LegalStep: React.FC<LegalStepProps> = ({
                 type="text"
                 value={legalTerms.dueAtStart || ''}
                 onChange={(e) => handleChange('dueAtStart', e.target.value)}
-                placeholder="$8,841.00"
+                placeholder="$6,630.75"
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-400"
               />
             </div>
@@ -121,7 +121,7 @@ export const LegalStep: React.FC<LegalStepProps> = ({
                 type="text"
                 value={legalTerms.dueUponCompletion || ''}
                 onChange={(e) => handleChange('dueUponCompletion', e.target.value)}
-                placeholder="$8,841.00"
+                placeholder="$6,630.75"
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-400"
               />
             </div>
