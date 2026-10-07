@@ -19,6 +19,8 @@ from copy import copy
 
 import openpyxl
 
+from lock_price_sheet import apply_lock
+
 SRC = os.path.join("reference", "JQC-EXCEL-PRICE-SHEET-1.xlsx")
 OUT = "Next Level Excel.xlsx"
 
@@ -124,6 +126,10 @@ def main():
     summary["C21"] = "=C19*0.25"
     summary["C22"] = "=C19*0.25"
     summary["C23"] = "=C20+C21+C22"
+
+    # portrait + label lock, so a rebuild can never hand Tim back a landscape,
+    # wide-open sheet
+    apply_lock(wb)
 
     wb.save(OUT)
     print("wrote", OUT)
