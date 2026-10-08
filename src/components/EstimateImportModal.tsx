@@ -10,7 +10,7 @@ import {
   Info,
 } from 'lucide-react';
 import { readEstimateFile, EstimateRead } from '../lib/excelEstimate';
-import { formatMoneyPlain, splitPaymentSchedule } from '../lib/money';
+import { dollarsToCents, formatMoneyPlain, paymentScheduleCents } from '../lib/money';
 
 /** What the app needs handed back once the numbers are approved. */
 export interface EstimateImportResult {
@@ -39,23 +39,32 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
   const [readError, setReadError] = useState<string | null>(null);
   const [found, setFound] = useState<EstimateRead | null>(null);
 
-  const isBlankTotal = found !== null && found.total === 0;
-  const canApply = found !== null && typeof found.total === 'number' && found.total !== 0;
+  // The sheet hands back dollars and cents (1826.769232). Everything on this screen works in
+  // whole cents, so the moment the file is read we switch to cents and stay there.
+  const totalCents = found && typeof found.total === 'number' ? dollarsToCents(found.total) : null;
 
-  // The sheet's own payment cells are used exactly as saved. Only if they're empty do
-  // we fall back to half / quarter / quarter of the total.
-  const sheetPayments =
-    found && found.dueAtSigning !== null && found.dueAtStart !== null && found.dueUponCompletion !== null
-      ? {
-          dueAtSigning: formatMoneyPlain(found.dueAtSigning),
-          dueAtStart: formatMoneyPlain(found.dueAtStart),
-          dueUponCompletion: formatMoneyPlain(found.dueUponCompletion),
-        }
+  const isBlankTotal = totalCents === 0;
+  const canApply = totalCents !== null && totalCents !== 0;
+
+  // Half / quarter / quarter of the total — the sheet's own schedule. The sheet's signing and
+  // start figures are kept when it has them; completion is always the exact remainder, so the
+  // three payments add back up to the total even when the pennies don't divide evenly.
+  const schedule =
+    totalCents !== null
+      ? paymentScheduleCents(
+          totalCents,
+          found && found.dueAtSigning !== null ? dollarsToCents(found.dueAtSigning) : null,
+          found && found.dueAtStart !== null ? dollarsToCents(found.dueAtStart) : null
+        )
       : null;
 
-  const fallbackPayments = found && typeof found.total === 'number' ? splitPaymentSchedule(String(found.total)) : null;
-
-  const payments = sheetPayments || fallbackPayments;
+  const payments = schedule
+    ? {
+        dueAtSigning: formatMoneyPlain(schedule.dueAtSigning),
+        dueAtStart: formatMoneyPlain(schedule.dueAtStart),
+        dueUponCompletion: formatMoneyPlain(schedule.dueUponCompletion),
+      }
+    : null;
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return;
@@ -73,9 +82,9 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
   };
 
   const handleApply = () => {
-    if (!canApply || !found || !payments) return;
+    if (!canApply || !found || !payments || totalCents === null) return;
     onApply({
-      totalEstimate: formatMoneyPlain(found.total as number),
+      totalEstimate: formatMoneyPlain(totalCents),
       dueAtSigning: payments.dueAtSigning,
       dueAtStart: payments.dueAtStart,
       dueUponCompletion: payments.dueUponCompletion,
@@ -162,7 +171,7 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
             <div className="flex items-baseline justify-between gap-3 border-b border-slate-800 pb-3">
               <span className="text-sm text-slate-300">Total Contract Amount</span>
               <span className="text-2xl font-black text-amber-300">
-                {typeof found.total === 'number' ? asMoney(found.total) : '—'}
+                {totalCents !== null ? asMoney(totalCents) : '—'}
               </span>
             </div>
 
@@ -180,9 +189,9 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
             </div>
 
             <p className="text-[11px] text-slate-400 pt-1 border-t border-slate-800">
-              {sheetPayments
-                ? 'Payment amounts read straight off your sheet, exactly as saved.'
-                : 'Your sheet\'s payment cells were empty, so these are half / quarter / quarter of the total.'}
+              Half at signing, a quarter at the start of the job, the rest on completion. If the total
+              doesn't split into even pennies, the odd one rides on the final payment so all three add
+              back up to the total exactly.
             </p>
 
             {found.jobName && (

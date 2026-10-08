@@ -22,22 +22,52 @@ export const parseMoneyToCents = (value: string): number | null => {
   return Math.round(amount * 100);
 };
 
+/** A spreadsheet cell holds dollars and cents (1826.769232); this makes it whole cents. */
+export const dollarsToCents = (value: number): number => Math.round(value * 100);
+
+export interface PaymentScheduleCents {
+  dueAtSigning: number;
+  dueAtStart: number;
+  dueUponCompletion: number;
+}
+
 /**
- * The boss's payment schedule: half at signing, a quarter at the start of the job,
- * a quarter on completion. The first two round down to the penny and the leftover
- * pennies land on the final payment, so the three always add back up to the total.
- * Returns null if the total isn't a usable number.
+ * The boss's payment schedule, in whole cents: half at signing, a quarter at the start of the
+ * job, and whatever is left on completion. The first two round down to the penny, so an odd
+ * penny always rides on the final payment and the three add back up to the total exactly —
+ * never a cent short.
+ *
+ * When the sheet already carries its own signing / start figures, those are kept; the
+ * completion payment is still worked out as the exact remainder, so the three always balance.
+ */
+export const paymentScheduleCents = (
+  totalCents: number,
+  sheetSigningCents: number | null = null,
+  sheetStartCents: number | null = null
+): PaymentScheduleCents => {
+  const dueAtSigning = sheetSigningCents ?? Math.floor(totalCents / 2);
+  const dueAtStart = sheetStartCents ?? Math.floor(totalCents / 4);
+
+  return {
+    dueAtSigning,
+    dueAtStart,
+    dueUponCompletion: totalCents - dueAtSigning - dueAtStart,
+  };
+};
+
+/**
+ * The payment schedule as plain dollar strings. Returns null if the total isn't usable.
+ * Used when someone types the total by hand, so the typed total and the payments agree to the penny.
  */
 export const splitPaymentSchedule = (estimate: string) => {
   const totalCents = parseMoneyToCents(estimate);
   if (totalCents === null) return null;
 
-  const dueAtSigning = Math.floor(totalCents / 2);
-  const dueAtStart = Math.floor(totalCents / 4);
+  const schedule = paymentScheduleCents(totalCents);
 
   return {
-    dueAtSigning: formatMoneyPlain(dueAtSigning),
-    dueAtStart: formatMoneyPlain(dueAtStart),
-    dueUponCompletion: formatMoneyPlain(totalCents - dueAtSigning - dueAtStart),
+    dueAtSigning: formatMoneyPlain(schedule.dueAtSigning),
+    dueAtStart: formatMoneyPlain(schedule.dueAtStart),
+    dueUponCompletion: formatMoneyPlain(schedule.dueUponCompletion),
   };
 };
