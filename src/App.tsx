@@ -539,13 +539,37 @@ export default function App() {
         {currentView === 'estimate' && (
           <EstimateImportModal
             currentTotal={proposal.totalEstimate || ''}
+            materialsSectionCount={
+              proposal.categories.find((c) => c.name === 'Material description')?.items.length ?? null
+            }
             onApply={(result: EstimateImportResult) => {
+              const stamp = Date.now();
               handleUpdateProposal({
                 ...proposal,
+                title: result.customerName ? `${result.customerName} Proposal` : proposal.title,
                 totalEstimate: result.totalEstimate,
-                clientInfo: result.jobName
-                  ? { ...proposal.clientInfo, projectSite: result.jobName }
-                  : proposal.clientInfo,
+                // Each Excel cell lands in its matching slot. An empty cell on the sheet leaves
+                // whatever is already typed on the proposal alone.
+                clientInfo: {
+                  ...proposal.clientInfo,
+                  clientName: result.customerName ?? proposal.clientInfo.clientName,
+                  address: result.customerAddress ?? proposal.clientInfo.address,
+                  phone: result.customerPhone ?? proposal.clientInfo.phone,
+                  projectSite: result.jobDescription ?? proposal.clientInfo.projectSite,
+                },
+                // Starred materials (names only) replace the Material description list.
+                categories:
+                  result.materials.length > 0
+                    ? proposal.categories.map((c) =>
+                        c.name === 'Material description'
+                          ? {
+                              ...c,
+                              isConfirmed: false,
+                              items: result.materials.map((text, idx) => ({ id: `item-${stamp}-${idx}`, text })),
+                            }
+                          : c
+                      )
+                    : proposal.categories,
                 legalTerms: {
                   ...proposal.legalTerms,
                   dueAtSigning: result.dueAtSigning,
