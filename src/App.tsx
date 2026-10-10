@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Proposal, ViewMode, ScopeCategory, CompanyConfig } from './types';
 import { SAMPLE_PROPOSAL, DEFAULT_CATEGORIES, DEFAULT_COMPANY_CONFIG, DEFAULT_LEGAL_TERMS, normalizeCategories } from './data/defaultTemplate';
@@ -145,16 +145,34 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY_PROPOSALS_LIST, JSON.stringify(savedProposals));
   }, [proposal, savedProposals]);
 
-  // Printing or exporting a proposal marks it Finished (shown on the home screen).
-
+  // Printing or exporting a proposal saves it as Finished, shows a short pop-up, and
+// takes the "Continue Working" button off the home screen (it lives in Past Proposals).
+  const proposalRef = useRef(proposal);
+  proposalRef.current = proposal;
+  const [finishedToast, setFinishedToast] = useState<string | null>(null);
   useEffect(() => {
-
-    const onPrinted = () => setProposal((p) => (p.status === 'completed' ? p : { ...p, status: 'completed' }));
-
+    let timer: number | undefined;
+    const onPrinted = () => {
+      const done: Proposal = {
+        ...proposalRef.current,
+        status: 'completed',
+        updatedAt: new Date().toISOString().split('T')[0],
+      };
+      setProposal(done);
+      setSavedProposals((prev) =>
+        prev.some((p) => p.id === done.id) ? prev.map((p) => (p.id === done.id ? done : p)) : [done, ...prev]
+      );
+      setIsSaved(true);
+      const who = done.clientInfo.clientName;
+      setFinishedToast(who ? ('Saved as finished: ' + who) : 'Saved as finished');
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => setFinishedToast(null), 4500);
+    };
     window.addEventListener('proposal-printed', onPrinted);
-
-    return () => window.removeEventListener('proposal-printed', onPrinted);
-
+    return () => {
+      window.removeEventListener('proposal-printed', onPrinted);
+      window.clearTimeout(timer);
+    };
   }, []);
 
 
@@ -210,7 +228,9 @@ export default function App() {
 
 
 
-  const handleUpdateProposal = (updated: Proposal) => {
+  const handleUpdateProposal = (edited: Proposal) => {
+    // Any edit to a finished proposal puts it back in progress.
+    const updated: Proposal = edited.status === 'completed' ? { ...edited, status: 'draft' } : edited;
     setProposal(updated);
     setIsSaved(false);
 
@@ -289,6 +309,7 @@ export default function App() {
   const handleDuplicateProposal = (source: Proposal) => {
     const cloned: Proposal = {
       ...source,
+      status: 'draft',
       id: `prop-${Date.now()}`,
       title: `${source.title} (Copy)`,
       clientInfo: {
@@ -381,16 +402,13 @@ export default function App() {
         {/* VIEW 0: LAUNCHER / HOME */}
         {currentView === 'home' && (
           <Launcher
-            hasExistingDraft={Boolean(
+            hasExistingDraft={proposal.status !== 'completed' && Boolean(
               proposal.clientInfo.clientName ||
               proposal.notes ||
               proposal.categories.some((c) => c.items.length > 0)
             )}
-            isFinished={proposal.status === 'completed'}
-            currentClientName={proposal.clientInfo.clientName}
             onNewProposal={handleNewProposal}
             onContinueDraft={() => {
-              if (proposal.status === 'completed') handleUpdateProposal({ ...proposal, status: 'draft' });
               setMaxReachedStep(Math.max(maxReachedStep, currentStepIndex));
               setCurrentView('wizard');
             }}
@@ -544,7 +562,7 @@ export default function App() {
             savedProposals={savedProposals}
             currentProposalId={proposal.id}
             onSelectProposal={(p) => {
-              setProposal(p);
+              setProposal(p.status === 'completed' ? { ...p, status: 'draft' } : p);
               setMaxReachedStep(0);
               setCurrentStepIndex(0);
               setCurrentView('preview');
@@ -646,6 +664,14 @@ export default function App() {
         onSelectCategory={(cat) => setActiveModalCategory(cat)}
       />
 
+      {finishedToast && (
+        <div
+          role="status"
+          className="fixed top-20 left-1/2 -translate-x-1/2 z-[60] print:hidden rounded-xl border border-emerald-500/60 bg-emerald-950/95 text-emerald-100 px-5 py-3 text-sm font-semibold shadow-2xl"
+        >
+          {finishedToast}
+        </div>
+      )}
       <BackupMenu
         proposal={proposal}
         savedProposals={savedProposals}
