@@ -3,11 +3,13 @@ import { Proposal } from '../types';
 import { Edit3 } from 'lucide-react';
 import { triggerSafePrint } from '../printUtils';
 import { formatMoneyPlain, parseMoneyToCents } from '../lib/money';
+import { CompanyHeader } from './CompanyHeader';
 
 interface DocumentPreviewProps {
   proposal: Proposal;
   onEditSection: (sectionIndex: number) => void;
   onOpenCategoryModal?: (category: any) => void;
+  onPrint?: () => void;
 }
 
 /** A stored money string as "$ 46,901.00", or a blank to write on by hand. */
@@ -20,20 +22,14 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   proposal,
   onEditSection,
   onOpenCategoryModal,
+  onPrint,
 }) => {
   const { companyConfig, clientInfo, categories, legalTerms, totalEstimate, notes } = proposal;
-  const logoToDisplay = companyConfig.logoUrl || '';
 
   const handlePrint = () => {
+    if (onPrint) { onPrint(); return; }
     triggerSafePrint(proposal);
   };
-
-  const contactBits = [
-    companyConfig.licenseNumber,
-    companyConfig.website,
-    companyConfig.email,
-    companyConfig.phone,
-  ].filter(Boolean);
 
   const filledCategories = categories.filter((cat) => cat.items.length > 0);
 
@@ -59,32 +55,16 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
       {/* Printable Sheet — plain, mirrors the boss's document. No colour, no rules. */}
       <div className="printable-sheet bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 sm:p-10 md:p-16 max-w-4xl mx-auto text-[12pt] leading-[1.4] relative overflow-hidden print:overflow-visible print:border-none print:shadow-none print:p-0 print:m-0">
 
-        {/* 1. Logo & company header — modest three lines, no banner */}
-        <div className="text-center">
-          {logoToDisplay ? (
-            <div className="flex justify-center mb-4">
-              <img
-                src={logoToDisplay}
-                alt={companyConfig.companyName}
-                className="max-h-32 max-w-full object-contain"
-                referrerPolicy="no-referrer"
-              />
-            </div>
-          ) : null}
-
-          <p className="text-[14pt]">{companyConfig.companyName || 'Contractor'}</p>
-          {companyConfig.tagline && <p className="text-[10pt] mt-1">{companyConfig.tagline}</p>}
-          {contactBits.length > 0 && <p className="text-[10pt] mt-1">{contactBits.join('   ')}</p>}
-          {companyConfig.address && <p className="text-[10pt] mt-1">{companyConfig.address}</p>}
-        </div>
+        {/* 1. Company header: the look is set per company on the Company & Logo screen */}
+        <CompanyHeader companyConfig={companyConfig} />
 
         {/* 2. Customer, then the one line naming the job */}
         <div className="mt-12">
-          <p>
+          <p className="font-bold">
             {[clientInfo.clientName, clientInfo.address, clientInfo.phone].filter(Boolean).join('  ')}
           </p>
-          <p className="font-bold mt-4">
-            work to be done: {clientInfo.projectSite || '______________________________'}
+          <p className="mt-4">
+            <span className="font-bold">work to be done:</span> {clientInfo.projectSite || '______________________________'}
           </p>
         </div>
 

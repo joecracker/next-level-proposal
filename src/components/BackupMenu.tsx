@@ -130,7 +130,7 @@ export function BackupMenu({ proposal, savedProposals, onRestore }: BackupMenuPr
       <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImportFile} />
       {open && (
         <div className="mb-2 w-72 rounded-lg border border-amber-500/30 bg-[#1a120c] p-3 shadow-xl text-stone-100">
-          <div className="text-xs font-semibold uppercase tracking-wide text-amber-400 mb-2">Backup</div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-amber-400 mb-2">Back up to Drive or a file</div>
 
           <div className="flex flex-col gap-1.5 mb-3">
             {driveConfigured ? (
@@ -196,7 +196,7 @@ export function BackupMenu({ proposal, savedProposals, onRestore }: BackupMenuPr
         onClick={() => setOpen((v) => !v)}
         className="rounded-full bg-amber-600 hover:bg-amber-500 text-stone-950 font-semibold text-sm px-4 py-2 shadow-lg"
       >
-        ☁ Backup
+        ☁ Back up to Drive
       </button>
     </div>
   );

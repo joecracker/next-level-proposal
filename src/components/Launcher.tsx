@@ -1,8 +1,10 @@
 import React from 'react';
-import { FileText, FolderOpen, Settings, HelpCircle, ClipboardPen, FileSpreadsheet } from 'lucide-react';
+import { FileText, FolderOpen, Settings, HelpCircle, ClipboardPen, FileSpreadsheet, CheckCircle2 } from 'lucide-react';
 
 interface LauncherProps {
   hasExistingDraft: boolean;
+  isFinished?: boolean;
+  currentClientName?: string;
   onNewProposal: () => void;
   onContinueDraft: () => void;
   onLoadFromExcel: () => void;
@@ -13,6 +15,8 @@ interface LauncherProps {
 
 export const Launcher: React.FC<LauncherProps> = ({
   hasExistingDraft,
+  isFinished = false,
+  currentClientName,
   onNewProposal,
   onContinueDraft,
   onLoadFromExcel,
@@ -42,14 +46,14 @@ export const Launcher: React.FC<LauncherProps> = ({
         {hasExistingDraft && (
           <button
             onClick={onContinueDraft}
-            className={`${door} border-slate-400/60 bg-slate-400/10 hover:bg-slate-400/20 text-slate-100`}
+            className={`${door} ${isFinished ? 'border-emerald-500/60 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-400/60 bg-slate-400/10 hover:bg-slate-400/20'} text-slate-100`}
           >
             <span className="text-3xl w-10 text-center shrink-0">
-              <ClipboardPen className="w-9 h-9 text-slate-300 mx-auto" />
+              {isFinished ? <CheckCircle2 className="w-9 h-9 text-emerald-400 mx-auto" /> : <ClipboardPen className="w-9 h-9 text-slate-300 mx-auto" />}
             </span>
             <span>
-              Continue Working
-              <div className={sub}>Pick up your current proposal where you left off</div>
+              {isFinished ? `Finished${currentClientName ? `: ${currentClientName}` : ''}` : 'Continue Working'}
+              <div className={sub}>{isFinished ? 'Printed and saved. Tap to reopen it and make changes' : 'Pick up your current proposal where you left off'}</div>
             </span>
           </button>
         )}

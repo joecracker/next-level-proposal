@@ -145,6 +145,36 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY_PROPOSALS_LIST, JSON.stringify(savedProposals));
   }, [proposal, savedProposals]);
 
+  // Printing or exporting a proposal marks it Finished (shown on the home screen).
+
+  useEffect(() => {
+
+    const onPrinted = () => setProposal((p) => (p.status === 'completed' ? p : { ...p, status: 'completed' }));
+
+    window.addEventListener('proposal-printed', onPrinted);
+
+    return () => window.removeEventListener('proposal-printed', onPrinted);
+
+  }, []);
+
+
+  // Keep the status on the saved-list copy in step with the open proposal.
+
+  useEffect(() => {
+
+    setSavedProposals((prev) =>
+
+      prev.some((p) => p.id === proposal.id && p.status !== proposal.status)
+
+        ? prev.map((p) => (p.id === proposal.id ? { ...p, status: proposal.status } : p))
+
+        : prev
+
+    );
+
+  }, [proposal.id, proposal.status]);
+
+
   // Keep the saved company profile in sync
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_COMPANY_PROFILE, JSON.stringify(companyProfile));
@@ -296,7 +326,7 @@ export default function App() {
   const handleAddCategory = () => {
     const newCat: ScopeCategory = {
       id: `cat-${Date.now()}`,
-      name: `${proposal.categories.length + 1}. Custom Work Scope`,
+      name: 'Custom Work Scope',
       description: 'Custom scope specifications',
       isConfirmed: false,
       items: [],
@@ -356,8 +386,11 @@ export default function App() {
               proposal.notes ||
               proposal.categories.some((c) => c.items.length > 0)
             )}
+            isFinished={proposal.status === 'completed'}
+            currentClientName={proposal.clientInfo.clientName}
             onNewProposal={handleNewProposal}
             onContinueDraft={() => {
+              if (proposal.status === 'completed') handleUpdateProposal({ ...proposal, status: 'draft' });
               setMaxReachedStep(Math.max(maxReachedStep, currentStepIndex));
               setCurrentView('wizard');
             }}
@@ -473,6 +506,10 @@ export default function App() {
                       proposal={proposal}
                       onEditSection={(idx) => goToStep(idx)}
                       onOpenCategoryModal={(cat) => setActiveModalCategory(cat)}
+                      onPrint={() => {
+                        setCurrentView('preview');
+                        setTimeout(() => triggerSafePrint(proposal), 700);
+                      }}
                     />
                     <ContractForms proposal={proposal} />
                   </>
@@ -546,6 +583,7 @@ export default function App() {
               const stamp = Date.now();
               handleUpdateProposal({
                 ...proposal,
+                status: 'draft',
                 title: result.customerName ? `${result.customerName} Proposal` : proposal.title,
                 totalEstimate: result.totalEstimate,
                 // Each Excel cell lands in its matching slot. An empty cell on the sheet leaves

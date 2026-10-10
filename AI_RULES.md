@@ -93,8 +93,8 @@ Reference copies on disk (`.dyad/media/`, hashed names — match by size/order, 
 
 Verified from the real proposal file:
 - **Arial 12pt**, US Letter, **0.5 in margins**, black on white. No colour, no rules, no gold anywhere.
-- Header: one logo image plus three modest lines (company name / "Licensed Builder" + "State Licensed & Insured" / license #, website, email, phone). The company name is **not** a giant uppercase banner.
-- Then the customer's name, address and phone, then a bold **`work to be done:`** line naming the job.
+- Header: one logo image plus three modest lines (company name / "Licensed Builder" + "State Licensed & Insured" / license #, website, email, phone). The company name is bold, title case (not all caps) and bigger than the body text (18pt, sized so the full name fits on one line) so the boss can spot it at a glance; the other header lines are regular weight (Tim, 2026-10-10).
+- Then the customer's name, address and phone **in bold**, then the **`work to be done:`** label in bold followed by the job description in regular weight (Tim, 2026-10-10).
 - **Section headings: bold Arial 12pt, sentence case, trailing colon.** Never ALL CAPS.
 - **Bullet lines carry real `•` dots.**
 - Order: Material description → Demolition → Carpentry → Plumbing → Electrical → *Allowances figured in price of job* → *Homeowner to supply* → money block → *Special note* → *Payment note* → signature lines.

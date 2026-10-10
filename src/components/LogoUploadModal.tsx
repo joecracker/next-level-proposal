@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { CompanyConfig } from '../types';
+import { CompanyConfig, HeaderStyle } from '../types';
+import { CompanyHeader } from './CompanyHeader';
+import { HEADER_FONTS, resolveHeaderStyle } from '../lib/headerStyle';
 import { Settings, Upload, Image, Check, RefreshCw, Building2, Trash2, Sparkles } from 'lucide-react';
 
 interface LogoUploadModalProps {
@@ -68,6 +70,10 @@ export const LogoUploadModal: React.FC<LogoUploadModalProps> = ({
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [pasteText, setPasteText] = useState('');
   const [pasteSuccess, setPasteSuccess] = useState(false);
+
+  const headerStyle = resolveHeaderStyle(config);
+  const setHeaderStyle = (patch: Partial<HeaderStyle>) =>
+    setConfig((prev) => ({ ...prev, headerStyle: { ...resolveHeaderStyle(prev), ...patch } }));
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -203,6 +209,97 @@ export const LogoUploadModal: React.FC<LogoUploadModalProps> = ({
                 Upload your logo (PNG / JPG). It is stored in this browser and printed at the top of every proposal sheet.
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Header look: font, size and bold for the company block, with a live sample */}
+        <div className="bg-slate-950 rounded-xl border border-slate-800 p-4 space-y-4">
+          <div>
+            <label className="text-xs font-semibold text-amber-300 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              Header Look (how the top of your proposal looks)
+            </label>
+            <p className="text-[11px] text-slate-400 mt-1">
+              The sample updates as you change things and matches what prints. A pasted block can't carry bold or fonts, so set them here.
+            </p>
+          </div>
+
+          <div className="bg-white text-black rounded-lg border border-slate-300 p-4 overflow-hidden">
+            <CompanyHeader companyConfig={config} />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-300">Company name font</label>
+              <select
+                value={headerStyle.nameFont}
+                onChange={(e) => setHeaderStyle({ nameFont: e.target.value as HeaderStyle['nameFont'] })}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-400"
+              >
+                {HEADER_FONTS.map((f) => (
+                  <option key={f.id} value={f.id}>{f.label}</option>
+                ))}
+              </select>
+              <p className="text-[10px] text-slate-500">Also used for the small lines under the name.</p>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-300">Company name size: {headerStyle.nameSizePt} pt</label>
+              <input
+                type="range" min={10} max={36} step={1}
+                value={headerStyle.nameSizePt}
+                onChange={(e) => setHeaderStyle({ nameSizePt: Number(e.target.value) })}
+                className="w-full accent-amber-500"
+              />
+            </div>
+
+            <div className="flex items-center gap-6">
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer">
+                <input type="checkbox" checked={headerStyle.nameBold} onChange={(e) => setHeaderStyle({ nameBold: e.target.checked })} className="accent-amber-500" />
+                Name bold
+              </label>
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer">
+                <input type="checkbox" checked={headerStyle.nameItalic} onChange={(e) => setHeaderStyle({ nameItalic: e.target.checked })} className="accent-amber-500" />
+                Name italic
+              </label>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-300">Small lines size: {headerStyle.detailSizePt} pt</label>
+              <input
+                type="range" min={7} max={14} step={0.5}
+                value={headerStyle.detailSizePt}
+                onChange={(e) => setHeaderStyle({ detailSizePt: Number(e.target.value) })}
+                className="w-full accent-amber-500"
+              />
+            </div>
+
+            <div className="flex items-center">
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer">
+                <input type="checkbox" checked={headerStyle.detailBold} onChange={(e) => setHeaderStyle({ detailBold: e.target.checked })} className="accent-amber-500" />
+                Small lines bold
+              </label>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-300">Logo size: {headerStyle.logoHeightPx} px tall</label>
+              <input
+                type="range" min={40} max={220} step={4}
+                value={headerStyle.logoHeightPx}
+                onChange={(e) => setHeaderStyle({ logoHeightPx: Number(e.target.value) })}
+                className="w-full accent-amber-500"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setConfig((prev) => ({ ...prev, headerStyle: undefined }))}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2 rounded-xl border border-slate-700 transition-all cursor-pointer"
+            >
+              Reset to standard look
+            </button>
           </div>
         </div>
 

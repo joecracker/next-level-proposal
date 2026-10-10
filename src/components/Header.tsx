@@ -32,6 +32,12 @@ export const Header: React.FC<HeaderProps> = ({
   isSaved,
 }) => {
   const handlePrint = () => {
+    // Only the full preview screen prints correctly, so go there first.
+    if (currentView !== 'preview') {
+      setCurrentView('preview');
+      setTimeout(() => triggerSafePrint(proposal), 700);
+      return;
+    }
     triggerSafePrint(proposal);
   };
 
