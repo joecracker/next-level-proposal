@@ -4,6 +4,7 @@ import { Edit3 } from 'lucide-react';
 import { triggerSafePrint } from '../printUtils';
 import { formatMoneyPlain, parseMoneyToCents } from '../lib/money';
 import { CompanyHeader } from './CompanyHeader';
+import { splitAddress } from '../lib/customerBlock';
 
 interface DocumentPreviewProps {
   proposal: Proposal;
@@ -60,9 +61,13 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
 
         {/* 2. Customer, then the one line naming the job */}
         <div className="mt-12">
-          <p className="font-bold">
-            {[clientInfo.clientName, clientInfo.address, clientInfo.phone].filter(Boolean).join('  ')}
-          </p>
+          <div className="font-bold">
+            {[clientInfo.clientName, ...splitAddress(clientInfo.address), clientInfo.phone]
+              .filter(Boolean)
+              .map((line, i) => (
+                <div key={i}>{line}</div>
+              ))}
+          </div>
           <p className="mt-4">
             <span className="font-bold">work to be done:</span> {clientInfo.projectSite || '______________________________'}
           </p>

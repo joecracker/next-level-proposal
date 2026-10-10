@@ -37,8 +37,17 @@
 }
 
 @media print {
+  /* Zero page margin is what stops the browser from stamping its own date, title and
+     web address at the top and bottom of every page. The half-inch margin is applied to the
+     sheet itself instead, and repeats on every printed page. */
   @page {
-    margin: 0.5in;
+    size: letter;
+    margin: 0;
+  }
+  .printable-sheet {
+    padding: 0.5in !important;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
   html, body {
     height: auto !important;
