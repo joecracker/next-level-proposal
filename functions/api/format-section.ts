@@ -44,6 +44,25 @@ async function generateWithFallback(ai: GoogleGenAI, params: GenerateParams) {
   throw lastError;
 }
 
+// Tim's proposals say "Remove", never "Demolish" / "Demo" / "Demolition". The prompt asks for that,
+// and this tidies up any line where the model still slips.
+const WORD_SWAPS: Record<string, string> = {
+  demolish: "remove",
+  demolishes: "removes",
+  demolished: "removed",
+  demolishing: "removing",
+  demo: "remove",
+  demolition: "removal",
+};
+
+export const cleanWording = (line: string): string =>
+  line
+    .replace(/\bdemolition\s+debris\b/gi, "debris")
+    .replace(/\b(demolishing|demolishes|demolished|demolish|demolition|demo)\b/gi, (word) => {
+      const swap = WORD_SWAPS[word.toLowerCase()];
+      return word[0] === word[0].toUpperCase() ? swap[0].toUpperCase() + swap.slice(1) : swap;
+    });
+
 // Cloudflare infers the PagesFunction type at build time; we type the handler
 // args inline so local tsc and Cloudflare's bundler both accept it.
 export const onRequestPost = async ({
@@ -88,6 +107,7 @@ Guidelines:
 4. If the user mentioned quantities, materials, dimensions, or specific installation instructions, highlight them cleanly.
 5. Keep each line item sharp, concise, and professional.
 6. Return an array of formatted line item strings.
+7. Wording rule: never use the words "demolish", "demolition" or "demo" in a line item. Say "Remove" instead (for example: "Remove existing bathtub and tub surround."). Do not repeat the section name inside the line items.
 
 Return JSON in this format:
 {
@@ -125,7 +145,7 @@ Return JSON in this format:
 
     return Response.json({
       success: true,
-      formattedItems: parsed.formattedItems || [],
+      formattedItems: (parsed.formattedItems || []).map((item: string) => cleanWording(String(item))),
       summary: parsed.summary || "Items formatted successfully",
     });
   } catch (error) {

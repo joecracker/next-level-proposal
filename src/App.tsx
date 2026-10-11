@@ -263,6 +263,12 @@ export default function App() {
     [...savedProposals, proposal].filter((p) => !isBlankProposal(p)).map((p) => p.id)
   ).size;
 
+  // The pop-up editor must show the live section (not the copy from when it was opened),
+  // otherwise deletes and new lines only appear after the pop-up is closed.
+  const liveModalCategory = activeModalCategory
+    ? proposal.categories.find((c) => c.id === activeModalCategory.id) ?? null
+    : null;
+
   // Where to pick a proposal back up: first section not yet confirmed.
   const resumeStepFor = (p: Proposal) => {
     if (!p.clientInfo.clientName) return 0;
@@ -700,8 +706,8 @@ export default function App() {
 
       {/* QUICK EDIT CATEGORY POP-UP MODAL WINDOW */}
       <CategoryModal
-        isOpen={Boolean(activeModalCategory)}
-        category={activeModalCategory}
+        isOpen={Boolean(liveModalCategory)}
+        category={liveModalCategory}
         allCategories={proposal.categories}
         onClose={() => setActiveModalCategory(null)}
         onUpdateCategory={handleUpdateCategory}
