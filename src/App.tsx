@@ -672,8 +672,9 @@ export default function App() {
                 setSavedProposals((prev) => [filled, ...prev.filter((p) => !isBlankProposal(p))]);
                 setIsSaved(true);
                 setPowerMode(false);
-                setMaxReachedStep(nextStep);
-                setCurrentStepIndex(nextStep);
+                // A new proposal starts at the top of the wizard so every section gets its turn.
+                setMaxReachedStep(0);
+                setCurrentStepIndex(0);
               } else {
                 handleUpdateProposal(filled);
                 goToStep(nextStep);

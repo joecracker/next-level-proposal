@@ -145,10 +145,10 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto animate-fade-in print:hidden">
-      <div className="relative w-full max-w-4xl bg-stone-950 text-stone-100 rounded-2xl border-2 border-amber-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-4xl bg-slate-950 text-slate-100 rounded-2xl border-2 border-amber-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Modal Top Bar Header */}
-        <div className="bg-stone-900 border-b border-amber-500/30 px-5 py-4 flex items-center justify-between shrink-0">
+        <div className="bg-slate-900 border-b border-amber-500/30 px-5 py-4 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/40 flex items-center justify-center font-bold text-amber-400">
               <Layers className="w-5 h-5" />
@@ -168,7 +168,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 type="text"
                 value={categoryName}
                 onChange={(e) => handleNameChange(e.target.value)}
-                className="text-lg sm:text-xl font-black text-white bg-transparent border-b border-dashed border-stone-700 focus:border-amber-400 focus:outline-none tracking-tight transition-colors w-full sm:w-80"
+                className="text-lg sm:text-xl font-black text-white bg-transparent border-b border-dashed border-slate-700 focus:border-amber-400 focus:outline-none tracking-tight transition-colors w-full sm:w-80"
                 placeholder="Section Category Name"
               />
             </div>
@@ -176,7 +176,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 text-stone-400 hover:text-white bg-stone-800 hover:bg-stone-700 rounded-xl border border-stone-700 transition-colors cursor-pointer"
+            className="p-2 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-colors cursor-pointer"
             title="Close Pop-up"
           >
             <X className="w-5 h-5" />
@@ -184,7 +184,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
         </div>
 
         {/* Section Quick Switcher Bar */}
-        <div className="bg-stone-900/80 border-b border-stone-800 px-4 py-2 flex items-center gap-2 overflow-x-auto shrink-0 scrollbar-thin">
+        <div className="bg-slate-900/80 border-b border-slate-800 px-4 py-2 flex items-center gap-2 overflow-x-auto shrink-0 scrollbar-thin">
           <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 shrink-0">
             SECTIONS:
           </span>
@@ -196,8 +196,8 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 onClick={() => onSelectCategory(cat)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
                   isSelected
-                    ? 'bg-amber-500 text-stone-950 shadow-md'
-                    : 'bg-stone-800 text-stone-300 hover:bg-stone-700 border border-stone-700'
+                    ? 'bg-amber-500 text-slate-950 shadow-md'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
                 }`}
               >
                 {cat.isConfirmed && <Check className="w-3 h-3 text-emerald-950 font-black" />}
@@ -211,17 +211,17 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
         <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
           
           {/* Notes Panel */}
-          <div className="bg-stone-900/90 rounded-2xl border border-amber-500/30 p-4 space-y-3">
+          <div className="bg-slate-900/90 rounded-2xl border border-amber-500/30 p-4 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center space-x-2">
                 <Volume2 className="w-4 h-4 text-amber-400" />
-                <h3 className="text-xs sm:text-sm font-bold text-stone-100">
+                <h3 className="text-xs sm:text-sm font-bold text-slate-100">
                   Quick Notes & AI Formatting
                 </h3>
               </div>
             </div>
 
-            <p className="text-xs text-stone-400">
+            <p className="text-xs text-slate-400">
               Type the items for <strong className="text-amber-300">{category.name}</strong> naturally. AI will format it line-by-line.
             </p>
 
@@ -230,7 +230,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
               onChange={(e) => setDictationText(e.target.value)}
               rows={3}
               placeholder="e.g. 'Install Delta Kayra valve trim, rough in shower drain, install tile on walls and bench per plan'"
-              className="w-full bg-stone-950 border border-stone-700 rounded-xl p-3 text-xs sm:text-sm text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-400"
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400"
             />
 
             {formatError && (
@@ -244,7 +244,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
               <button
                 onClick={handleAIFormat}
                 disabled={isFormatting || !dictationText.trim()}
-                className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-extrabold text-xs px-4 py-2 rounded-xl shadow flex items-center space-x-2 transition-all cursor-pointer"
+                className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-extrabold text-xs px-4 py-2 rounded-xl shadow flex items-center space-x-2 transition-all cursor-pointer"
               >
                 {isFormatting ? (
                   <>
@@ -268,12 +268,12 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
               value={newItemInput}
               onChange={(e) => setNewItemInput(e.target.value)}
               placeholder={`Add single line item to ${category.name}...`}
-              className="flex-1 bg-stone-900 border border-stone-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-400"
+              className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400"
             />
             <button
               type="submit"
               disabled={!newItemInput.trim()}
-              className="bg-stone-800 hover:bg-stone-700 disabled:opacity-50 text-amber-400 border border-amber-500/40 font-bold px-4 py-2 rounded-xl text-xs flex items-center space-x-1 transition-colors shrink-0"
+              className="bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-amber-400 border border-amber-500/40 font-bold px-4 py-2 rounded-xl text-xs flex items-center space-x-1 transition-colors shrink-0"
             >
               <Plus className="w-4 h-4" />
               <span>Add Item</span>
@@ -282,14 +282,14 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
 
           {/* Current Line Items List */}
           <div className="space-y-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400 border-b border-stone-800 pb-2">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">
               WHAT PRINTS ON THE PROPOSAL ({category.items.length})
             </h4>
 
             {category.items.length === 0 ? (
-              <div className="text-center py-6 border border-dashed border-stone-800 rounded-2xl bg-stone-900/40">
-                <p className="text-xs text-stone-400">Nothing on the proposal for this section yet.</p>
-                <p className="text-[11px] text-stone-500 mt-1">
+              <div className="text-center py-6 border border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
+                <p className="text-xs text-slate-400">Nothing on the proposal for this section yet.</p>
+                <p className="text-[11px] text-slate-500 mt-1">
                   Use the notes box above, or write a line manually.
                 </p>
               </div>
@@ -298,18 +298,18 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 {category.items.map((item, idx) => (
                   <div
                     key={item.id}
-                    className="flex items-center space-x-2 bg-stone-900 border border-stone-800 rounded-xl p-2.5 hover:border-amber-500/30 transition-colors"
+                    className="flex items-center space-x-2 bg-slate-900 border border-slate-800 rounded-xl p-2.5 hover:border-amber-500/30 transition-colors"
                   >
                     <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 ml-1"></span>
                     <input
                       type="text"
                       value={item.text}
                       onChange={(e) => handleItemTextChange(item.id, e.target.value)}
-                      className="flex-1 bg-transparent text-xs sm:text-sm text-stone-100 focus:outline-none focus:border-b focus:border-amber-400 font-medium px-1"
+                      className="flex-1 bg-transparent text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-b focus:border-amber-400 font-medium px-1"
                     />
                     <button
                       onClick={() => handleDeleteItem(item.id)}
-                      className="p-1.5 text-stone-500 hover:text-rose-400 hover:bg-stone-800 rounded-lg transition-colors cursor-pointer"
+                      className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                       title="Delete item"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -322,22 +322,22 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
         </div>
 
         {/* Modal Bottom Action Footer */}
-        <div className="bg-stone-900 border-t border-amber-500/30 px-5 py-3.5 flex items-center justify-between shrink-0">
-          <span className="text-xs text-stone-400">
+        <div className="bg-slate-900 border-t border-amber-500/30 px-5 py-3.5 flex items-center justify-between shrink-0">
+          <span className="text-xs text-slate-400">
             Next Level Proposal &bull; Section Editor
           </span>
 
           <div className="flex items-center space-x-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 border border-stone-700 text-xs font-bold transition-all cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold transition-all cursor-pointer"
             >
               Cancel
             </button>
 
             <button
               onClick={handleSaveAndClose}
-              className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-extrabold text-xs shadow-lg flex items-center space-x-2 transition-all cursor-pointer"
+              className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs shadow-lg flex items-center space-x-2 transition-all cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>Save & Confirm Section</span>

@@ -129,7 +129,7 @@ export function BackupMenu({ proposal, savedProposals, onRestore }: BackupMenuPr
     <div className="fixed bottom-4 right-4 z-50 print:hidden">
       <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImportFile} />
       {open && (
-        <div className="mb-2 w-72 rounded-lg border border-amber-500/30 bg-[#1a120c] p-3 shadow-xl text-stone-100">
+        <div className="mb-2 w-72 rounded-lg border border-amber-500/30 bg-slate-900 p-3 shadow-xl text-slate-100">
           <div className="text-xs font-semibold uppercase tracking-wide text-amber-400 mb-2">Back up to Drive or a file</div>
 
           <div className="flex flex-col gap-1.5 mb-3">
@@ -153,7 +153,7 @@ export function BackupMenu({ proposal, savedProposals, onRestore }: BackupMenuPr
                   <button
                     disabled={busy}
                     onClick={handleDisconnect}
-                    className="text-left text-xs px-2 py-1 text-stone-400 hover:text-stone-200"
+                    className="text-left text-xs px-2 py-1 text-slate-400 hover:text-slate-200"
                   >
                     Disconnect
                   </button>
@@ -168,7 +168,7 @@ export function BackupMenu({ proposal, savedProposals, onRestore }: BackupMenuPr
                 </button>
               )
             ) : (
-              <div className="text-xs text-stone-400">
+              <div className="text-xs text-slate-400">
                 Google Drive backup isn't configured yet (missing Client ID). See GOOGLE_DRIVE_SETUP.md.
               </div>
             )}
@@ -189,12 +189,12 @@ export function BackupMenu({ proposal, savedProposals, onRestore }: BackupMenuPr
             </button>
           </div>
 
-          {status && <div className="mt-2 text-xs text-stone-400">{status}</div>}
+          {status && <div className="mt-2 text-xs text-slate-400">{status}</div>}
         </div>
       )}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="rounded-full bg-amber-600 hover:bg-amber-500 text-stone-950 font-semibold text-sm px-4 py-2 shadow-lg"
+        className="rounded-full bg-amber-600 hover:bg-amber-500 text-slate-950 font-semibold text-sm px-4 py-2 shadow-lg"
       >
         ☁ Back up to Drive
       </button>
