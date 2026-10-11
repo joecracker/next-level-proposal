@@ -96,9 +96,9 @@ export const ProposalsList: React.FC<ProposalsListProps> = ({
                         Finished
                       </span>
                     )}
-                    {isCurrent && prop.status !== 'completed' && (
+                    {prop.status !== 'completed' && (
                       <span className="bg-amber-500 text-slate-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">
-                        Active Draft
+                        In progress
                       </span>
                     )}
                   </div>

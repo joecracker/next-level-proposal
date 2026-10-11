@@ -21,6 +21,8 @@ interface HeaderProps {
   onNewProposal: () => void;
   onSaveProposal: () => void;
   isSaved: boolean;
+  /** True on the final review screen, where Save & Finish turns green. */
+  readyToFinish?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -30,6 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
   onNewProposal,
   onSaveProposal,
   isSaved,
+  readyToFinish = false,
 }) => {
   const handlePrint = () => {
     // Only the full preview screen prints correctly, so go there first.
@@ -129,7 +132,11 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center space-x-2 sm:space-x-3">
             <button
               onClick={onSaveProposal}
-              className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold shadow-md transition-all cursor-pointer"
+              className={`flex items-center space-x-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                readyToFinish
+                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+              }`}
               title="Save this proposal as finished and go back to the menu"
             >
               <CheckCircle2 className="w-4 h-4" />

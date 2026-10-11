@@ -169,7 +169,7 @@ export default function App() {
       );
       setIsSaved(true);
       const who = done.clientInfo.clientName;
-      setFinishedToast((who ? 'Saved as finished: ' + who : 'Saved as finished') + '. Find it under Open a Past Proposal.');
+      setFinishedToast((who ? 'Saved as finished: ' + who : 'Saved as finished') + '. Find it under All past proposals.');
       window.clearTimeout(timer);
       timer = window.setTimeout(() => setFinishedToast(null), 6500);
     };
@@ -247,6 +247,37 @@ export default function App() {
     );
   };
 
+  // Menu: proposals that are started but not finished (the open one is always current).
+  const inProgressList = (() => {
+    const byId = new Map<string, Proposal>();
+    savedProposals.forEach((p) => byId.set(p.id, p));
+    byId.set(proposal.id, proposal);
+    const list = [...byId.values()].filter((p) => p.status !== 'completed' && !isBlankProposal(p));
+    list.sort((x, y) => (y.updatedAt || '').localeCompare(x.updatedAt || ''));
+    const current = list.findIndex((p) => p.id === proposal.id);
+    if (current > 0) list.unshift(list.splice(current, 1)[0]);
+    return list;
+  })();
+  const pastCount = new Set(
+    [...savedProposals, proposal].filter((p) => !isBlankProposal(p)).map((p) => p.id)
+  ).size;
+
+  // Where to pick a proposal back up: first section not yet confirmed.
+  const resumeStepFor = (p: Proposal) => {
+    if (!p.clientInfo.clientName) return 0;
+    const firstOpen = p.categories.findIndex((c) => !c.isConfirmed);
+    return firstOpen === -1 ? p.categories.length + 1 : firstOpen + 1;
+  };
+
+  const handleOpenInProgress = (p: Proposal) => {
+    const isOpenOne = p.id === proposal.id;
+    const step = isOpenOne && currentStepIndex > 0 ? currentStepIndex : resumeStepFor(p);
+    if (!isOpenOne) setProposal(p);
+    setPowerMode(false);
+    setCurrentStepIndex(step);
+    setMaxReachedStep(isOpenOne ? Math.max(maxReachedStep, step) : step);
+    setCurrentView('wizard');
+  };
   // Save & Finish: mark it finished, save it to Past Proposals, and go back to the menu.
   const handleSaveAndFinish = () => {
     window.dispatchEvent(new CustomEvent('proposal-finished'));
@@ -388,6 +419,10 @@ export default function App() {
         onNewProposal={handleNewProposal}
         onSaveProposal={handleSaveAndFinish}
         isSaved={isSaved}
+        readyToFinish={
+          currentView === 'preview' ||
+          (currentView === 'wizard' && currentStepIndex === proposal.categories.length + 2)
+        }
       />
 
       {/* Main Container */}
@@ -397,16 +432,10 @@ export default function App() {
         {/* VIEW 0: LAUNCHER / HOME */}
         {currentView === 'home' && (
           <Launcher
-            hasExistingDraft={proposal.status !== 'completed' && Boolean(
-              proposal.clientInfo.clientName ||
-              proposal.notes ||
-              proposal.categories.some((c) => c.items.length > 0)
-            )}
+            inProgress={inProgressList}
+            pastCount={pastCount}
             onNewProposal={handleNewProposal}
-            onContinueDraft={() => {
-              setMaxReachedStep(Math.max(maxReachedStep, currentStepIndex));
-              setCurrentView('wizard');
-            }}
+            onOpenInProgress={handleOpenInProgress}
             onLoadFromExcel={() => setCurrentView('estimate')}
             onOpenPast={() => setCurrentView('history')}
             onCompanyProfile={() => setCurrentView('settings')}
