@@ -169,13 +169,13 @@ export default function App() {
       );
       setIsSaved(true);
       const who = done.clientInfo.clientName;
-      setFinishedToast(who ? ('Saved as finished: ' + who) : 'Saved as finished');
+      setFinishedToast((who ? 'Saved as finished: ' + who : 'Saved as finished') + '. Find it under Open a Past Proposal.');
       window.clearTimeout(timer);
-      timer = window.setTimeout(() => setFinishedToast(null), 4500);
+      timer = window.setTimeout(() => setFinishedToast(null), 6500);
     };
-    window.addEventListener('proposal-printed', onPrinted);
+    window.addEventListener('proposal-finished', onPrinted);
     return () => {
-      window.removeEventListener('proposal-printed', onPrinted);
+      window.removeEventListener('proposal-finished', onPrinted);
       window.clearTimeout(timer);
     };
   }, []);
@@ -247,23 +247,10 @@ export default function App() {
     );
   };
 
-  const handleSaveProposal = () => {
-    const updated = {
-      ...proposal,
-      updatedAt: new Date().toISOString().split('T')[0],
-    };
-
-    setProposal(updated);
-
-    setSavedProposals((prev) => {
-      const exists = prev.some((p) => p.id === updated.id);
-      if (exists) {
-        return prev.map((p) => (p.id === updated.id ? updated : p));
-      }
-      return [updated, ...prev];
-    });
-
-    setIsSaved(true);
+  // Save & Finish: mark it finished, save it to Past Proposals, and go back to the menu.
+  const handleSaveAndFinish = () => {
+    window.dispatchEvent(new CustomEvent('proposal-finished'));
+    setCurrentView('home');
   };
 
   const handleSaveCompanyProfile = (newConfig: CompanyConfig) => {
@@ -399,7 +386,7 @@ export default function App() {
         setCurrentView={setCurrentView}
         proposal={proposal}
         onNewProposal={handleNewProposal}
-        onSaveProposal={handleSaveProposal}
+        onSaveProposal={handleSaveAndFinish}
         isSaved={isSaved}
       />
 
@@ -532,6 +519,7 @@ export default function App() {
                       proposal={proposal}
                       onEditSection={(idx) => goToStep(idx)}
                       onOpenCategoryModal={(cat) => setActiveModalCategory(cat)}
+                      onSaveAndFinish={handleSaveAndFinish}
                       onPrint={() => {
                         setCurrentView('preview');
                         setTimeout(() => triggerSafePrint(proposal), 700);
@@ -559,6 +547,7 @@ export default function App() {
                 setCurrentView('wizard');
               }}
               onOpenCategoryModal={(cat) => setActiveModalCategory(cat)}
+              onSaveAndFinish={handleSaveAndFinish}
             />
             <ContractForms proposal={proposal} />
           </>

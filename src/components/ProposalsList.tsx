@@ -91,7 +91,12 @@ export const ProposalsList: React.FC<ProposalsListProps> = ({
                     <span className="font-bold text-sm sm:text-base text-white">
                       {prop.title || 'Untitled Proposal'}
                     </span>
-                    {isCurrent && (
+                    {prop.status === 'completed' && (
+                      <span className="bg-emerald-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">
+                        Finished
+                      </span>
+                    )}
+                    {isCurrent && prop.status !== 'completed' && (
                       <span className="bg-amber-500 text-slate-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">
                         Active Draft
                       </span>

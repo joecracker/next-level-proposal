@@ -1,6 +1,6 @@
 export const triggerSafePrint = (proposal?: any) => {
   // Tell the app a proposal was printed/exported, so it can mark it Finished.
-  window.dispatchEvent(new CustomEvent('proposal-printed'));
+  window.dispatchEvent(new CustomEvent('proposal-finished'));
   if (window !== window.top) {
     const newUrl = new URL(window.location.href);
     newUrl.searchParams.set('view', 'preview');

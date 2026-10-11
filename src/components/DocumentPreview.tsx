@@ -11,6 +11,7 @@ interface DocumentPreviewProps {
   onEditSection: (sectionIndex: number) => void;
   onOpenCategoryModal?: (category: any) => void;
   onPrint?: () => void;
+  onSaveAndFinish?: () => void;
 }
 
 /** A stored money string as "$ 46,901.00", or a blank to write on by hand. */
@@ -24,6 +25,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   onEditSection,
   onOpenCategoryModal,
   onPrint,
+  onSaveAndFinish,
 }) => {
   const { companyConfig, clientInfo, categories, legalTerms, totalEstimate, notes } = proposal;
 
@@ -45,12 +47,22 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
           <Edit3 className="w-4 h-4 text-amber-400" />
           <span>Edit Sections</span>
         </button>
-        <button
-          onClick={handlePrint}
-          className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl shadow-lg text-sm flex items-center space-x-2 transition-all cursor-pointer"
-        >
-          <span>Print / PDF</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {onSaveAndFinish && (
+            <button
+              onClick={onSaveAndFinish}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl shadow-lg text-sm flex items-center space-x-2 transition-all cursor-pointer"
+            >
+              <span>Save & Finish</span>
+            </button>
+          )}
+          <button
+            onClick={handlePrint}
+            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl shadow-lg text-sm flex items-center space-x-2 transition-all cursor-pointer"
+          >
+            <span>Print / PDF</span>
+          </button>
+        </div>
       </div>
 
       {/* Printable Sheet — plain, mirrors the boss's document. No colour, no rules. */}
