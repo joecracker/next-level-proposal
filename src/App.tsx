@@ -24,6 +24,7 @@ import { CategoryModal } from './components/CategoryModal';
 import { HowToView } from './components/HowToView';
 import { BackupMenu } from './components/BackupMenu';
 import { isBlankProposal } from './lib/blankProposal';
+import { proposalDisplayName } from './lib/proposalName';
 import { triggerSafePrint } from './printUtils';
 import { splitPaymentSchedule } from './lib/money';
 
@@ -168,7 +169,7 @@ export default function App() {
         prev.some((p) => p.id === done.id) ? prev.map((p) => (p.id === done.id ? done : p)) : [done, ...prev]
       );
       setIsSaved(true);
-      const who = done.clientInfo.clientName;
+      const who = proposalDisplayName(done);
       setFinishedToast((who ? 'Saved as finished: ' + who : 'Saved as finished') + '. Find it under All past proposals.');
       window.clearTimeout(timer);
       timer = window.setTimeout(() => setFinishedToast(null), 6500);

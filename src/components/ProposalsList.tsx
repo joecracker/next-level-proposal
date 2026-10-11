@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Proposal } from '../types';
+import { proposalDisplayName } from '../lib/proposalName';
 import { FolderOpen, Search, Plus, Trash2, Copy, Calendar, User, FileText, ArrowRight } from 'lucide-react';
 
 interface ProposalsListProps {
@@ -24,7 +25,8 @@ export const ProposalsList: React.FC<ProposalsListProps> = ({
   const filtered = savedProposals.filter(
     (p) =>
       p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.clientInfo.clientName.toLowerCase().includes(searchTerm.toLowerCase())
+      p.clientInfo.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.clientInfo.projectSite || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -89,7 +91,7 @@ export const ProposalsList: React.FC<ProposalsListProps> = ({
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
                     <span className="font-bold text-sm sm:text-base text-white">
-                      {prop.title || 'Untitled Proposal'}
+                      {proposalDisplayName(prop)}
                     </span>
                     {prop.status === 'completed' && (
                       <span className="bg-emerald-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">
@@ -104,10 +106,6 @@ export const ProposalsList: React.FC<ProposalsListProps> = ({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
-                    <span className="flex items-center gap-1 text-slate-300">
-                      <User className="w-3.5 h-3.5 text-amber-400" />
-                      {prop.clientInfo.clientName || 'No client name'}
-                    </span>
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5 text-slate-500" />
                       {prop.clientInfo.proposalDate}
@@ -127,7 +125,7 @@ export const ProposalsList: React.FC<ProposalsListProps> = ({
 
                   <button
                     onClick={() => {
-                      const who = prop.clientInfo?.clientName || prop.title || 'this proposal';
+                      const who = proposalDisplayName(prop);
                       if (window.confirm('Delete the proposal for ' + who + '? This cannot be undone.')) {
                         onDeleteProposal(prop.id);
                       }

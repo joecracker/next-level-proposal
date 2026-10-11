@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FileText, FolderOpen, Settings, HelpCircle, FileSpreadsheet, Building2, ChevronRight } from 'lucide-react';
 import { Proposal } from '../types';
+import { proposalDisplayName } from '../lib/proposalName';
 
 interface LauncherProps {
   /** Proposals that are started but not finished, most recent first. */
@@ -90,10 +91,10 @@ export const Launcher: React.FC<LauncherProps> = ({
                 >
                   <span className="min-w-0">
                     <span className="block font-bold text-slate-100 truncate">
-                      {p.clientInfo.clientName || p.title || 'Untitled proposal'}
+                      {proposalDisplayName(p)}
                     </span>
                     <span className="block text-xs text-slate-400 truncate">
-                      {p.clientInfo.projectSite || 'No job description yet'}
+                      {p.updatedAt ? 'Last worked on ' + p.updatedAt : 'Not saved yet'}
                     </span>
                   </span>
                   <span className="flex items-center gap-2 shrink-0">
