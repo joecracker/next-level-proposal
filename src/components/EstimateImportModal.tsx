@@ -29,16 +29,19 @@ export interface EstimateImportResult {
 }
 
 interface EstimateImportModalProps {
+  /** Name of the proposal that is open now, or null when it is still blank (nothing to overwrite). */
+  existingName: string | null;
   currentTotal: string;
   /** How many lines the proposal's Material description section holds now, or null if it has no such section. */
   materialsSectionCount: number | null;
-  onApply: (result: EstimateImportResult) => void;
+  onApply: (result: EstimateImportResult, mode: 'new' | 'update') => void;
   onClose: () => void;
 }
 
 const asMoney = (cents: number) => `$${formatMoneyPlain(cents)}`;
 
 export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
+  existingName,
   currentTotal,
   materialsSectionCount,
   onApply,
@@ -48,6 +51,9 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
   const [isReading, setIsReading] = useState(false);
   const [readError, setReadError] = useState<string | null>(null);
   const [found, setFound] = useState<EstimateRead | null>(null);
+  // New proposal is always the starting choice, so an import can never silently overwrite a job.
+  const [mode, setMode] = useState<'new' | 'update'>('new');
+  const updating = mode === 'update' && existingName !== null;
 
   // The sheet hands back dollars and cents (1826.769232). Everything on this screen works in
   // whole cents, so the moment the file is read we switch to cents and stay there.
@@ -104,7 +110,7 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
       customerPhone: found.customerPhone,
       jobDescription: found.jobDescription,
       materials: starred.map((item) => item.name),
-    });
+    }, updating ? 'update' : 'new');
   };
 
   const infoRows: Array<[string, string | null]> = found
@@ -268,12 +274,12 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
               ) : (
                 <p className="text-xs text-slate-500 italic">None found.</p>
               )}
-              {starred.length > 0 && materialsSectionCount === null && (
+              {updating && starred.length > 0 && materialsSectionCount === null && (
                 <p className="text-[11px] text-amber-300">
                   This proposal has no "Material description" section, so these won't be added.
                 </p>
               )}
-              {starred.length > 0 && materialsSectionCount !== null && materialsSectionCount > 0 && (
+              {updating && starred.length > 0 && materialsSectionCount !== null && materialsSectionCount > 0 && (
                 <p className="text-[11px] text-slate-400">
                   This will replace the {materialsSectionCount} line{materialsSectionCount === 1 ? '' : 's'}{' '}
                   now in the Material description section.
@@ -292,8 +298,35 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
             </div>
           )}
 
-          {currentTotal && (
-            <p className="text-[11px] text-slate-400">
+          {existingName !== null && (
+            <div className="bg-slate-950 border border-slate-700 rounded-xl p-4 space-y-2">
+              <div className="text-xs font-semibold text-amber-300">Where should this go?</div>
+              <button
+                type="button"
+                onClick={() => setMode('new')}
+                className={`w-full text-left rounded-xl border px-4 py-3 transition-all cursor-pointer ${
+                  !updating ? 'border-amber-500 bg-amber-500/10' : 'border-slate-700 bg-slate-900 hover:bg-slate-800'
+                }`}
+              >
+                <div className="text-sm font-bold text-slate-100">Start a new proposal from this sheet</div>
+                <div className="text-[11px] text-slate-400 mt-0.5">Your other proposals are not touched.</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode('update')}
+                className={`w-full text-left rounded-xl border px-4 py-3 transition-all cursor-pointer ${
+                  updating ? 'border-amber-500 bg-amber-500/10' : 'border-slate-700 bg-slate-900 hover:bg-slate-800'
+                }`}
+              >
+                <div className="text-sm font-bold text-slate-100">Update {existingName}</div>
+                <div className="text-[11px] text-slate-400 mt-0.5">
+                  Replaces that proposal's customer info, total and payments with this sheet's.
+                </div>
+              </button>
+            </div>
+          )}
+
+          {updating && currentTotal && (            <p className="text-[11px] text-slate-400">
               This will replace the total that's on the proposal right now (${currentTotal.replace('$', '')}).
             </p>
           )}
@@ -327,7 +360,7 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
           disabled={!canApply}
           className="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm flex items-center justify-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
         >
-          <span>Use This Info</span>
+          <span>{updating ? 'Update This Proposal' : existingName !== null ? 'Create New Proposal' : 'Use This Info'}</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

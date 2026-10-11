@@ -293,9 +293,9 @@ export default function App() {
     });
   };
 
-  const handleNewProposal = () => {
+  const makeBlankProposal = (): Proposal => {
     const newId = `prop-${Date.now()}`;
-    const newProp: Proposal = {
+    return {
       id: newId,
       title: 'New Client Proposal',
       createdAt: new Date().toISOString().split('T')[0],
@@ -322,7 +322,10 @@ export default function App() {
       totalEstimate: '',
       notes: '',
     };
+  };
 
+  const handleNewProposal = () => {
+    const newProp = makeBlankProposal();
     setProposal(newProp);
     // Starting a new one drops any earlier blank start from the list.
     setSavedProposals((prev) => [newProp, ...prev.filter((p) => !isBlankProposal(p))]);
@@ -620,30 +623,33 @@ export default function App() {
         {/* VIEW 4B: LOAD THE JOB NUMBERS FROM THE EXCEL ESTIMATE SHEET */}
         {currentView === 'estimate' && (
           <EstimateImportModal
+            existingName={isBlankProposal(proposal) ? null : proposalDisplayName(proposal)}
             currentTotal={proposal.totalEstimate || ''}
             materialsSectionCount={
               proposal.categories.find((c) => c.name === 'Material description')?.items.length ?? null
             }
-            onApply={(result: EstimateImportResult) => {
+            onApply={(result: EstimateImportResult, mode) => {
               const stamp = Date.now();
-              handleUpdateProposal({
-                ...proposal,
+              // "new" starts from a blank proposal so no other job is ever overwritten.
+              const base: Proposal = mode === 'new' ? makeBlankProposal() : proposal;
+              const filled: Proposal = {
+                ...base,
                 status: 'draft',
-                title: result.customerName ? `${result.customerName} Proposal` : proposal.title,
+                title: result.customerName ? `${result.customerName} Proposal` : base.title,
                 totalEstimate: result.totalEstimate,
                 // Each Excel cell lands in its matching slot. An empty cell on the sheet leaves
                 // whatever is already typed on the proposal alone.
                 clientInfo: {
-                  ...proposal.clientInfo,
-                  clientName: result.customerName ?? proposal.clientInfo.clientName,
-                  address: result.customerAddress ?? proposal.clientInfo.address,
-                  phone: result.customerPhone ?? proposal.clientInfo.phone,
-                  projectSite: result.jobDescription ?? proposal.clientInfo.projectSite,
+                  ...base.clientInfo,
+                  clientName: result.customerName ?? base.clientInfo.clientName,
+                  address: result.customerAddress ?? base.clientInfo.address,
+                  phone: result.customerPhone ?? base.clientInfo.phone,
+                  projectSite: result.jobDescription ?? base.clientInfo.projectSite,
                 },
                 // Starred materials (names only) replace the Material description list.
                 categories:
                   result.materials.length > 0
-                    ? proposal.categories.map((c) =>
+                    ? base.categories.map((c) =>
                         c.name === 'Material description'
                           ? {
                               ...c,
@@ -652,18 +658,28 @@ export default function App() {
                             }
                           : c
                       )
-                    : proposal.categories,
+                    : base.categories,
                 legalTerms: {
-                  ...proposal.legalTerms,
+                  ...base.legalTerms,
                   dueAtSigning: result.dueAtSigning,
                   dueAtStart: result.dueAtStart,
                   dueUponCompletion: result.dueUponCompletion,
                 },
-              });
+              };
+              const nextStep = base.categories.length + 1;
+              if (mode === 'new') {
+                setProposal(filled);
+                setSavedProposals((prev) => [filled, ...prev.filter((p) => !isBlankProposal(p))]);
+                setIsSaved(true);
+                setPowerMode(false);
+                setMaxReachedStep(nextStep);
+                setCurrentStepIndex(nextStep);
+              } else {
+                handleUpdateProposal(filled);
+                goToStep(nextStep);
+              }
               setCurrentView('wizard');
-              goToStep(proposal.categories.length + 1);
-            }}
-            onClose={() => setCurrentView('home')}
+            }}            onClose={() => setCurrentView('home')}
           />
         )}
 
