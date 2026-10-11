@@ -121,7 +121,12 @@ export const ProposalsList: React.FC<ProposalsListProps> = ({
                   </button>
 
                   <button
-                    onClick={() => onDeleteProposal(prop.id)}
+                    onClick={() => {
+                      const who = prop.clientInfo?.clientName || prop.title || 'this proposal';
+                      if (window.confirm('Delete the proposal for ' + who + '? This cannot be undone.')) {
+                        onDeleteProposal(prop.id);
+                      }
+                    }}
                     className="p-2 bg-slate-700/80 hover:bg-rose-900/60 text-slate-400 hover:text-rose-300 rounded-lg text-xs font-medium transition-colors"
                     title="Delete Proposal"
                   >

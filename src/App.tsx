@@ -23,6 +23,7 @@ import { ProposalsList } from './components/ProposalsList';
 import { CategoryModal } from './components/CategoryModal';
 import { HowToView } from './components/HowToView';
 import { BackupMenu } from './components/BackupMenu';
+import { isBlankProposal } from './lib/blankProposal';
 import { triggerSafePrint } from './printUtils';
 import { splitPaymentSchedule } from './lib/money';
 
@@ -142,7 +143,11 @@ export default function App() {
   // Auto-save active proposal to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_PROPOSAL, JSON.stringify(proposal));
-    localStorage.setItem(STORAGE_KEY_PROPOSALS_LIST, JSON.stringify(savedProposals));
+    // Untouched blank proposals are not kept (the open one stays so edits still land).
+    localStorage.setItem(
+      STORAGE_KEY_PROPOSALS_LIST,
+      JSON.stringify(savedProposals.filter((p) => !isBlankProposal(p) || p.id === proposal.id))
+    );
   }, [proposal, savedProposals]);
 
   // Printing or exporting a proposal saves it as Finished, shows a short pop-up, and
@@ -234,9 +239,11 @@ export default function App() {
     setProposal(updated);
     setIsSaved(false);
 
-    // Update in list if exists
+    // Update in list, or add it if it is not there yet
     setSavedProposals((prev) =>
-      prev.map((p) => (p.id === updated.id ? updated : p))
+      prev.some((p) => p.id === updated.id)
+        ? prev.map((p) => (p.id === updated.id ? updated : p))
+        : [updated, ...prev]
     );
   };
 
@@ -298,7 +305,8 @@ export default function App() {
     };
 
     setProposal(newProp);
-    setSavedProposals((prev) => [newProp, ...prev]);
+    // Starting a new one drops any earlier blank start from the list.
+    setSavedProposals((prev) => [newProp, ...prev.filter((p) => !isBlankProposal(p))]);
     setMaxReachedStep(0);
     setCurrentStepIndex(0);
     setPowerMode(false);
@@ -559,7 +567,7 @@ export default function App() {
         {/* VIEW 3: SAVED PROPOSALS LIBRARY */}
         {currentView === 'history' && (
           <ProposalsList
-            savedProposals={savedProposals}
+            savedProposals={savedProposals.filter((p) => !isBlankProposal(p))}
             currentProposalId={proposal.id}
             onSelectProposal={(p) => {
               setProposal(p.status === 'completed' ? { ...p, status: 'draft' } : p);
