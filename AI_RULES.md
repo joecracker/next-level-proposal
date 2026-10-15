@@ -39,19 +39,10 @@ There is no test framework and no ESLint/Prettier config. `npm run lint` is just
 - Google Drive access token in `sessionStorage` under `gdrive_backup_token_v1`.
 - Optional Google Drive backup: client-side Google Identity Services token flow, scope `drive.file` only. Client ID comes from `VITE_GOOGLE_CLIENT_ID`; target folder ID + filename are constants in `src/lib/backup.ts`. See `GOOGLE_DRIVE_SETUP.md`. Plain JSON export/import must keep working with zero setup.
 
-## Estimating: the spreadsheet is the calculator
-Tim estimates in his own `.xlsx` workbook and **that file is the single source of truth for every number.** Nothing in this app recomputes, rounds, or reformats his money.
-
-**One protected artifact: the original workbook in Tim's real Documents folder. Never open it for writing and never save over it — that is the only thing we must not touch.** Everything else is fair game. Copy the workbook and edit the copy as hard as the job needs — new columns, renamed labels, new formulas, per-section subtotals. Tim keeps separate backups and has explicitly cleared this. Work on the copy, always; the original stays pristine even so.
-
-- Flow: home screen → **Load From Excel** (`ViewMode` `estimate` → `src/components/EstimateImportModal.tsx`). Separate button and separate code path from the Word-doc importer.
-- `src/lib/excelEstimate.ts` opens the file locally in the browser (`read-excel-file/browser`), reads **every** tab, and takes whichever tab carries the summary labels.
-- `src/lib/estimateParser.ts` is the pure, testable rule: find the labels the sheet already uses and take the **last number on the labelled row**. On the payment rows the `50%` / `25%` text sits to the left of the dollar amount, so "the next cell over" grabs the wrong cell. Conversely, the value for a label is only the cell *directly* beside it — hunting further along the row reads the neighbouring `Date:` label back as the job name.
-- Labels it looks for, spelled exactly as the workbook already has them: `Total Contract Amount`, `Due at Signing (1/2 Down)`, `Due at Start of Job (1/4)`, `Due Upon Completion (1/4)`, `Job Name:`.
-- Payment split is **half at signing, then a quarter at the start and a quarter on completion** (`splitPaymentSchedule` in `src/lib/money.ts`), matching the workbook's own schedule — not thirds. The sheet's own payment cells win when they're filled in; the split is only a fallback when they're empty.
-- **Numbers never go to the AI.** The reader must not be folded into `DocxImportModal.tsx`'s Gemini path. AI polish may rewrite wording only; estimate figures are copied verbatim and are never recomputed or "tidied up".
-- Internal-cost columns (`Internal Cost (Us)`, `Our Cost`, `Markup %`, `Profit ($)`, `Margin %`) are **never** read — only customer-facing totals cross over into a proposal.
-- The workbook stores each formula's last saved result, so the app shows what was saved. If a filled sheet reads as `$0.00`, the fix is recalculate-and-save in the spreadsheet (Ctrl+Shift+F9 in LibreOffice). Mixed Excel/LibreOffice use is expected and both save standard `.xlsx`.
+## Detailed notes: read on demand (kept out of this file on purpose)
+Long reference material lives in `docs/` so it is not loaded on every turn. Before you start a task on one of these topics, read the matching note with read_file. It takes a little longer, and that is expected; tell Tim in a few words that you are reading it. Anything new you learn on these topics goes into the matching note, not into this file.
+- `docs/estimating.md`: read before touching the price sheet, estimate numbers, line items, totals, or how the spreadsheet drives the proposal.
+- `docs/target-document.md`: read before changing the printed proposal's layout, wording, sections or fonts. It describes Tim's boss's real proposal, the document we are matching.
 
 ## Server layer (Cloudflare Pages Functions — not Nitro/Vite)
 - `functions/api/format-section.ts` → `POST /api/format-section`
@@ -68,7 +59,6 @@ Tim estimates in his own `.xlsx` workbook and **that file is the single source o
 - Live domain is `nextlevelproposal.crackerbox.app` (`wrangler.json` is the source of truth for the domain).
 
 ## How to talk to Tim
-Tim is the app's owner and is **not a coder yet**. Explain things in plain English, skip the jargon, and define any technical term you can't avoid. Work **one thing at a time** — don't dump a pile of tasks in one go. Never say "problem" or "bug" about code you only read but never ran; say what you saw and whether you tested it.
 
 **Tim's words for the two source files — match his usage exactly:**
 - **"the excel sheet" / "the price sheet"** = the `.xlsx` estimate workbook (the calculator). Always the spreadsheet.
@@ -80,29 +70,6 @@ When Tim names one, he means that one. Don't ask him to disambiguate.
 **"A toddler's toy with the robot's brain."** Every screen gets big, obvious buttons a non-coder can work out with no explanation; the complexity lives underneath, where he never has to look at it. Don't surface columns, settings, or machinery he didn't ask for, and never make him understand a mechanism in order to use it. He wants to know *that* something is happening, not *how*.
 
 The app is also meant to become shareable with other companies. Company name, logo, header and legal statement must stay switchable — never hard-code July's Quality Construction.
-
-## The target document — Tim's boss's real proposal
-The printed proposal must come out **essentially the same document Tim's boss writes.** The app was built by an AI told to mimic that proposal, but it kept *interpreting* the format instead of following it. Tim wants the interpretation to stop. **No gold, no amber, no decorative rules, no "fancy".**
-
-Reference copies on disk (`.dyad/media/`, hashed names — match by size/order, not by name):
-- **Filled-out real proposal** (the *Stover bath job*, Tim's boss's most recent): `d23da1a7824469a568c58d67f4db6ba8104b2035d842a1e18ff3add01d97f9ee.docx`
-- Blank template: `1e887b0007ea497b49fb8c2a354dda0335709ed4efeaecaf107e22c4ba09fc01.docx`
-- Price sheet (blank): `ff92edc00132f6e831c25d8f0a0b3d351c71e52dc453e247f7bd9abb63f76cd9.xlsx`
-
-**How to read a `.docx`/`.xlsx` here:** both are just zips of XML. **Python 3.12 is installed** — use `python` with `zipfile` + `xml.etree`, reading `word/document.xml`. There is no pandoc, no LibreOffice and no `unzip` on this box. Never hand-write file-format bytes.
-
-Verified from the real proposal file:
-- **Arial 12pt**, US Letter, **0.5 in margins**, black on white. No colour, no rules, no gold anywhere.
-- Header: one logo image plus three modest lines (company name / "Licensed Builder" + "State Licensed & Insured" / license #, website, email, phone). The company name is bold, title case (not all caps) and bigger than the body text (18pt, sized so the full name fits on one line) so the boss can spot it at a glance; the other header lines are regular weight (Tim, 2026-10-10).
-- Then the customer's name, address and phone **in bold**, then the **`work to be done:`** label in bold followed by the job description in regular weight (Tim, 2026-10-10).
-- **Section headings: bold Arial 12pt, sentence case, trailing colon.** Never ALL CAPS.
-- **Bullet lines carry real `•` dots.**
-- Order: Material description → Demolition → Carpentry → Plumbing → Electrical → *Allowances figured in price of job* → *Homeowner to supply* → money block → *Special note* → *Payment note* → signature lines.
-  - The source file actually puts Carpentry **last** among trades; **Tim has said he wants Carpentry before Plumbing and Electrical.** Follow Tim.
-- Money block: label on the left, dollar figure in a **staggered right-hand column** so all four line up. Labels: `Total for all work described above:`, `Due at signing of contract:`, `Due at start of job:`, `Due upon completion of job:`.
-- Allowance bullets and "Homeowner to supply" bullets are ordinary list items (allowances happen to carry a `$` figure inside the bullet text).
-- Signatures: one plain underscore line per party with a caption row — **no ruled borders**.
-- Note: the app's `amber` colour scale in `src/index.css` was repainted grey/silver by an earlier agent to neutralise leftover gold. Treat that as cover-up, not as permission — check `src/index.css` before adding colour to the printed page.
 
 ## Rules future agents must preserve
 1. **Never expose the AI key.** All AI calls stay in `functions/api/*`; the browser must never see `GEMINI_API_KEY`.
