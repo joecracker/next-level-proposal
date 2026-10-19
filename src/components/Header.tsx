@@ -119,7 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setCurrentView('howto')}
               className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                 currentView === 'howto'
-                  ? 'bg-blue-500 text-white font-semibold shadow-md'
+                  ? 'bg-brass text-brass-foreground font-semibold shadow-md'
                   : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
               }`}
             >
@@ -204,7 +204,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={() => setCurrentView('howto')}
             className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap ${
-              currentView === 'howto' ? 'bg-blue-500 text-white font-bold' : 'text-slate-300 bg-slate-800'
+              currentView === 'howto' ? 'bg-brass text-brass-foreground font-bold' : 'text-slate-300 bg-slate-800'
             }`}
           >
             <HelpCircle className="w-3.5 h-3.5" />

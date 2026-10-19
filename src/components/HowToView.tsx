@@ -23,7 +23,7 @@ export const HowToView: React.FC = () => {
           </div>
           <div>
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <User className="w-5 h-5 text-blue-400" /> Fill Out The Client Info
+              <User className="w-5 h-5 text-brass" /> Fill Out The Client Info
             </h3>
             <p className="text-slate-300 mt-2 leading-relaxed">
               Start on the "Contact Info" step. Type in the client's name, address, and whatever notes you have.
