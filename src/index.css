@@ -4,12 +4,42 @@
    slate → medium-dark blue neutrals, amber → pewter silver. */
 @theme {
   /* Brand aliases */
-  --color-ink: #12243f;
-  --color-ember: #9aa0a8;
-  --color-cream: #e8ecf1;
-  --color-muted: #8d9196;
+  --color-ink: #14191a;
+  --color-ember: #8a9a5c;
+  --color-cream: #eef1ee;
+  --color-muted: #9aa5a3;
+  --color-brass: #a08a58;
+  --color-brass-foreground: #14191a;
 
-  /* slate → blue neutrals */
+  /* slate -> charcoal neutrals (same family as XL and the NextLevel page) */
+  --color-slate-50: #f1f4f4;
+  --color-slate-100: #e2e7e7;
+  --color-slate-200: #c9d1d1;
+  --color-slate-300: #9aa5a3;
+  --color-slate-400: #7d8886;
+  --color-slate-500: #667170;
+  --color-slate-600: #4b5655;
+  --color-slate-700: #2a3234;
+  --color-slate-800: #1c2324;
+  --color-slate-900: #14191a;
+  --color-slate-950: #0e1213;
+
+  /* amber -> olive moss accent */
+  --color-amber-50: #f4f6ee;
+  --color-amber-100: #e7ebd8;
+  --color-amber-200: #d3dab7;
+  --color-amber-300: #b9c48f;
+  --color-amber-400: #9fae6f;
+  --color-amber-500: #8a9a5c;
+  --color-amber-600: #738248;
+  --color-amber-700: #5c6a3a;
+  --color-amber-800: #4a5c2e;
+  --color-amber-900: #3a4825;
+  --color-amber-950: #262f17;
+}
+
+/* The proposal paper keeps its original ink and borders. */
+.printable-sheet {
   --color-slate-50: #f1f5f9;
   --color-slate-100: #e2e8f0;
   --color-slate-200: #cbd5e1;
@@ -21,8 +51,6 @@
   --color-slate-800: #162a4a;
   --color-slate-900: #12243f;
   --color-slate-950: #0d1a2e;
-
-  /* amber → pewter silver scale (not shiny chrome) */
   --color-amber-50: #f8f9fa;
   --color-amber-100: #e9ecef;
   --color-amber-200: #dee2e6;

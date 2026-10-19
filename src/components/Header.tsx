@@ -48,16 +48,16 @@ export const Header: React.FC<HeaderProps> = ({
     <>
       <header className="bg-slate-900 text-white border-b border-slate-700 sticky top-0 z-40 shadow-2xl print:hidden">
       {/* Top Accent Bar — pewter */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-slate-600 via-slate-400 to-slate-600 shadow-[0_0_10px_rgba(154,160,168,0.35)]"></div>
+      <div className="h-0.5 w-full bg-amber-500"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-900">
-        <div className="flex items-center justify-between h-16 sm:h-20">
+        <div className="flex items-center justify-between h-16">
           
           {/* Brand Title — full name, no icon box */}
           <div className="flex flex-col justify-center cursor-pointer" onClick={() => setCurrentView('home')} title="Back to home">
             <h1 className="tracking-tight uppercase drop-shadow leading-none whitespace-nowrap">
-              <span className="text-xl sm:text-2xl lg:text-[28px] font-black text-slate-100">Next </span>
-              <span className="text-xl sm:text-2xl lg:text-[28px] font-black text-slate-400">Level</span>
+              <span className="text-xl sm:text-2xl lg:text-[28px] font-black text-brass">Next </span>
+              <span className="text-xl sm:text-2xl lg:text-[28px] font-black text-amber-500">Level</span>
               <span className="text-base sm:text-lg lg:text-xl font-semibold tracking-wide text-slate-100 ml-2">Proposal</span>
             </h1>
             <p className="hidden sm:block text-[11px] font-bold text-slate-400 uppercase tracking-[0.22em] mt-1">
@@ -145,7 +145,7 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={handlePrint}
-              className="flex items-center space-x-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold shadow-md transition-all cursor-pointer"
+              className="flex items-center space-x-1.5 bg-brass hover:bg-brass/90 text-brass-foreground px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold shadow-md transition-all cursor-pointer"
               title="Print or Export PDF"
             >
               <Printer className="w-4 h-4" />

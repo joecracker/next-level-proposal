@@ -58,7 +58,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
           )}
           <button
             onClick={handlePrint}
-            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl shadow-lg text-sm flex items-center space-x-2 transition-all cursor-pointer"
+            className="bg-brass hover:bg-brass/90 text-brass-foreground font-bold px-6 py-2.5 rounded-xl shadow-lg text-sm flex items-center space-x-2 transition-all cursor-pointer"
           >
             <span>Print / PDF</span>
           </button>
