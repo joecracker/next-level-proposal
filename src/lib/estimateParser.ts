@@ -33,6 +33,8 @@ export interface ParsedEstimate {
   customerName: string | null;
   customerAddress: string | null;
   customerPhone: string | null;
+  /** Optional: older sheets have no Email label, and that is not a problem. */
+  customerEmail: string | null;
   jobDescription: string | null;
   /** Plain-English labels we found, so the screen can show what it actually read. */
   foundLabels: string[];
@@ -49,6 +51,7 @@ export const ESTIMATE_LABELS = {
   customerName: 'Customer Name:',
   customerAddress: 'Customer Address:',
   customerPhone: 'Customer Phone:',
+  customerEmail: 'Email:',
   jobDescription: 'Description of Job:',
 } as const;
 
@@ -106,10 +109,10 @@ export function parseEstimateRows(rows: EstimateRows): ParsedEstimate {
     return lastNumberInRow(hit.row);
   };
 
-  const readText = (label: string): string | null => {
+  const readText = (label: string, optional = false): string | null => {
     const hit = findLabel(rows, label);
     if (!hit) {
-      missingLabels.push(label);
+      if (!optional) missingLabels.push(label);
       return null;
     }
     foundLabels.push(label);
@@ -123,6 +126,7 @@ export function parseEstimateRows(rows: EstimateRows): ParsedEstimate {
   const customerName = readText(ESTIMATE_LABELS.customerName);
   const customerAddress = readText(ESTIMATE_LABELS.customerAddress);
   const customerPhone = readText(ESTIMATE_LABELS.customerPhone);
+  const customerEmail = readText(ESTIMATE_LABELS.customerEmail, true);
   const jobDescription = readText(ESTIMATE_LABELS.jobDescription);
 
   return {
@@ -133,6 +137,7 @@ export function parseEstimateRows(rows: EstimateRows): ParsedEstimate {
     customerName,
     customerAddress,
     customerPhone,
+    customerEmail,
     jobDescription,
     foundLabels,
     missingLabels,

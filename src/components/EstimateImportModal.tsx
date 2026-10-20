@@ -22,6 +22,7 @@ export interface EstimateImportResult {
   customerName: string | null;
   customerAddress: string | null;
   customerPhone: string | null;
+  customerEmail: string | null;
   /** Goes into the proposal's project title slot (e.g. "Bathroom remodel"). */
   jobDescription: string | null;
   /** Starred materials, in sheet order. Names only - never a price. */
@@ -108,6 +109,7 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
       customerName: found.customerName,
       customerAddress: found.customerAddress,
       customerPhone: found.customerPhone,
+      customerEmail: found.customerEmail,
       jobDescription: found.jobDescription,
       materials: starred.map((item) => item.name),
     }, updating ? 'update' : 'new');
@@ -118,6 +120,7 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
         ['Customer name', found.customerName],
         ['Address', found.customerAddress],
         ['Phone', found.customerPhone],
+        ['Email', found.customerEmail],
         ['Description of job', found.jobDescription],
       ]
     : [];

@@ -656,6 +656,7 @@ export default function App() {
                   clientName: result.customerName ?? base.clientInfo.clientName,
                   address: result.customerAddress ?? base.clientInfo.address,
                   phone: result.customerPhone ?? base.clientInfo.phone,
+                  email: result.customerEmail ?? base.clientInfo.email,
                   projectSite: result.jobDescription ?? base.clientInfo.projectSite,
                 },
                 // Starred materials (names only) replace the Material description list.

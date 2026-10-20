@@ -74,7 +74,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
         {/* 2. Customer, then the one line naming the job */}
         <div className="mt-12">
           <div className="font-bold">
-            {[clientInfo.clientName, ...splitAddress(clientInfo.address), clientInfo.phone]
+            {[clientInfo.clientName, ...splitAddress(clientInfo.address), clientInfo.phone, clientInfo.email]
               .filter(Boolean)
               .map((line, i) => (
                 <div key={i}>{line}</div>
