@@ -141,6 +141,12 @@ export default function App() {
     setMaxReachedStep((m) => Math.max(m, idx));
   };
 
+  // Every time a step opens, start at the top of the page so the step title is not hidden
+  // under the sticky menu bar (the page used to stay scrolled from wherever you clicked).
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [currentStepIndex]);
+
   // Auto-save active proposal to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_PROPOSAL, JSON.stringify(proposal));
