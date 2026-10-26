@@ -10,6 +10,15 @@ import {
   Info,
 } from 'lucide-react';
 import { readEstimateFile, EstimateRead } from '../lib/excelEstimate';
+import {
+  driveConfigured,
+  isDriveConnected,
+  connectGoogleDrive,
+  listEstimateJobs,
+  downloadEstimateFile,
+  type DriveJobEntry,
+} from '../lib/driveJobs';
+import { driveError } from '../lib/driveError';
 import { dollarsToCents, formatMoneyPlain, paymentScheduleCents } from '../lib/money';
 
 /** What the app needs handed back once the info is approved. */
@@ -99,6 +108,37 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
     }
   };
 
+  // Google Drive: the estimates XL has filed in each job's folder.
+  const [driveOpen, setDriveOpen] = useState(false);
+  const [driveJobs, setDriveJobs] = useState<DriveJobEntry[] | null>(null);
+  const [driveBusy, setDriveBusy] = useState(false);
+  const [driveMsg, setDriveMsg] = useState<string | null>(null);
+
+  const loadDriveJobs = async () => {
+    setDriveBusy(true);
+    setDriveMsg(null);
+    try {
+      if (!isDriveConnected()) await connectGoogleDrive();
+      setDriveJobs(await listEstimateJobs());
+    } catch (err) {
+      setDriveMsg(driveError(err));
+    }
+    setDriveBusy(false);
+  };
+
+  const pickDriveJob = async (job: DriveJobEntry) => {
+    setDriveBusy(true);
+    setDriveMsg(null);
+    try {
+      const file = await downloadEstimateFile(job);
+      setDriveOpen(false);
+      await handleFile(file);
+    } catch (err) {
+      setDriveMsg(driveError(err));
+    }
+    setDriveBusy(false);
+  };
+
   const handleApply = () => {
     if (!canApply || !found || !payments || totalCents === null) return;
     onApply({
@@ -141,6 +181,80 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
           sheet, and nothing in your spreadsheet gets changed.
         </p>
       </div>
+
+      {/* From Google Drive */}
+      {driveConfigured && (
+        <div className="bg-slate-950/50 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-bold text-white">From Google Drive</div>
+              <div className="text-[11px] text-slate-400">
+                The estimates XL filed in each job's folder. No file hunting.
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const next = !driveOpen;
+                setDriveOpen(next);
+                if (next && driveJobs === null && isDriveConnected()) void loadDriveJobs();
+              }}
+              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shrink-0 cursor-pointer"
+            >
+              {driveOpen ? 'Hide' : 'Pick from Google Drive'}
+            </button>
+          </div>
+          {driveOpen && (
+            <div className="space-y-2">
+              {driveMsg && (
+                <div className="bg-rose-950/60 border border-rose-500/40 p-3 rounded-xl text-xs text-rose-200">
+                  {driveMsg}
+                </div>
+              )}
+              {driveBusy && (
+                <div className="flex items-center gap-2 text-xs text-slate-300">
+                  <Loader2 className="w-4 h-4 animate-spin text-amber-400" /> Working&hellip;
+                </div>
+              )}
+              {driveJobs === null && !driveBusy && (
+                <button
+                  type="button"
+                  onClick={() => void loadDriveJobs()}
+                  className="w-full bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold px-4 py-3 rounded-xl border border-slate-700 cursor-pointer"
+                >
+                  Connect Google Drive
+                </button>
+              )}
+              {driveJobs !== null && driveJobs.length === 0 && !driveBusy && (
+                <p className="text-xs text-slate-400">
+                  No estimates in Drive yet. In XL, open the job from Google Drive, then export it.
+                </p>
+              )}
+              {driveJobs !== null &&
+                driveJobs.map((job) => (
+                  <button
+                    key={job.fileId}
+                    type="button"
+                    disabled={driveBusy}
+                    onClick={() => void pickDriveJob(job)}
+                    className="w-full text-left rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 px-4 py-3 disabled:opacity-60 cursor-pointer"
+                  >
+                    <div className="text-sm font-bold text-slate-100">{job.name}</div>
+                    <div className="text-[11px] text-slate-400">
+                      Saved{' '}
+                      {new Date(job.modified).toLocaleString([], {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })}
+                    </div>
+                  </button>
+                ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Dropzone */}
       <div
