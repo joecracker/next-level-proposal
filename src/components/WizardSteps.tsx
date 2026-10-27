@@ -105,7 +105,7 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                 Customer & Project Info
               </div>
               <div className={`text-[11px] truncate ${currentStepIndex === 0 ? 'text-slate-900 font-normal' : 'text-slate-400'}`}>
-                Name, Address, Proposal #
+                Name, Address, Phone
               </div>
             </div>
           </div>

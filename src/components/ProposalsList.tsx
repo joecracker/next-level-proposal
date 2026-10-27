@@ -62,7 +62,7 @@ export const ProposalsList: React.FC<ProposalsListProps> = ({
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search by client name, project title, or proposal #..."
+          placeholder="Search by client name or project title..."
           className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 transition-all"
         />
       </div>

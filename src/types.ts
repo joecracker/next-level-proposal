@@ -4,7 +4,6 @@ export interface ClientInfo {
   phone: string;
   email: string;
   projectSite: string;
-  proposalNumber: string;
   proposalDate: string;
   salesRep: string;
 }

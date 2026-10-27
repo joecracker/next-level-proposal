@@ -116,7 +116,6 @@ export const SAMPLE_PROPOSAL: Proposal = {
     phone: "",
     email: "",
     projectSite: "",
-    proposalNumber: "",
     proposalDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
     salesRep: ""
   },

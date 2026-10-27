@@ -423,7 +423,6 @@ export default function App() {
         phone: '',
         email: '',
         projectSite: '',
-        proposalNumber: '',
         proposalDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
         salesRep: '',
       },
@@ -460,7 +459,6 @@ export default function App() {
       title: `${source.title} (Copy)`,
       clientInfo: {
         ...source.clientInfo,
-        proposalNumber: '',
         proposalDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
       },
       createdAt: new Date().toISOString().split('T')[0],
