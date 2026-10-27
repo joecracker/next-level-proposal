@@ -9,7 +9,7 @@ import {
 } from './googleDrive';
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-const JOBS_FOLDER_NAME = 'Next Level Jobs';
+const JOBS_FOLDER_NAME = 'JQC Jobs';
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 export const driveConfigured = Boolean(CLIENT_ID);
