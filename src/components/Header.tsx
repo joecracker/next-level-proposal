@@ -7,6 +7,7 @@ import {
   FileUp,
   Settings,
   Printer,
+  CloudUpload,
   PlusCircle,
   CheckCircle2,
   Sparkles,
@@ -21,6 +22,10 @@ interface HeaderProps {
   proposal: Proposal;
   onNewProposal: () => void;
   onSaveProposal: () => void;
+  /** Files the PDF and the editable copy in the job's Google Drive folder. */
+  onSaveToDrive?: () => void;
+  /** Files them, then prints. */
+  onPrint?: () => void;
   isSaved: boolean;
   /** True on the final review screen, where Save & Finish turns green. */
   readyToFinish?: boolean;
@@ -34,11 +39,17 @@ export const Header: React.FC<HeaderProps> = ({
   proposal,
   onNewProposal,
   onSaveProposal,
+  onSaveToDrive,
+  onPrint,
   isSaved,
   readyToFinish = false,
   onUpdateFromExcel,
 }) => {
   const handlePrint = () => {
+    if (onPrint) {
+      onPrint();
+      return;
+    }
     // Only the full preview screen prints correctly, so go there first.
     if (currentView !== 'preview') {
       setCurrentView('preview');
@@ -158,13 +169,24 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Save & Finish</span>
             </button>
 
+            {onSaveToDrive && (
+              <button
+                onClick={onSaveToDrive}
+                className="flex items-center space-x-1.5 whitespace-nowrap bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600 px-2.5 py-1.5 2xl:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer"
+                title="Save to Drive: file the PDF and the editable copy in this job's Google Drive folder"
+                aria-label="Save to Drive"
+              >
+                <CloudUpload className="w-4 h-4" />
+                <span className="hidden 2xl:inline">Save to Drive</span>
+              </button>
+            )}
             <button
               onClick={handlePrint}
               className="flex items-center space-x-1.5 bg-brass hover:bg-brass/90 text-brass-foreground px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold shadow-md transition-all cursor-pointer"
-              title="Print or Export PDF"
+              title={onSaveToDrive ? 'File it in Google Drive, then print' : 'Print'}
             >
               <Printer className="w-4 h-4" />
-              <span>Print / PDF</span>
+              <span>Print</span>
             </button>
 
 

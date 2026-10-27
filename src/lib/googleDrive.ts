@@ -425,3 +425,18 @@ export async function downloadFile(clientId: string, fileId: string): Promise<Bl
   if (!res.ok) throw new Error(`Drive download failed (${res.status})`);
   return res.blob();
 }
+
+/** Every file with this exact name, with the folders it sits in. (The apps only see files their own Google client made.) */
+export async function listFilesByName(
+  clientId: string,
+  fileName: string,
+): Promise<Array<{ id: string; parents: string[]; modifiedTime: string }>> {
+  const accessToken = await ensureToken(clientId);
+  const q = encodeURIComponent(`name = '${escQ(fileName)}' and trashed = false`);
+  const rows = await listAllFiles<{ id: string; parents?: string[]; modifiedTime: string }>(
+    accessToken,
+    `https://www.googleapis.com/drive/v3/files?pageSize=100&q=${q}&fields=nextPageToken,files(id,parents,modifiedTime)`,
+    'file list',
+  );
+  return rows.map((r) => ({ id: r.id, parents: r.parents || [], modifiedTime: r.modifiedTime }));
+}

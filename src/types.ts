@@ -58,6 +58,13 @@ export interface CompanyConfig {
   headerStyle?: HeaderStyle;
 }
 
+/** The Google Drive job a proposal belongs to, so its PDF and editable copy are filed in that job's folder. */
+export interface ProposalDriveJob {
+  jobId: string;
+  name: string;
+  folderId: string | null;
+}
+
 export interface Proposal {
   id: string;
   title: string;
@@ -70,6 +77,8 @@ export interface Proposal {
   companyConfig: CompanyConfig;
   totalEstimate?: string;
   notes?: string;
+  /** Set when the proposal is tied to a job in Google Drive. */
+  driveJob?: ProposalDriveJob;
 }
 
 export type ViewMode =

@@ -82,11 +82,11 @@ export const HowToView: React.FC = () => {
           </div>
           <div>
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Printer className="w-5 h-5 text-amber-400" /> Print It Out!
+              <Printer className="w-5 h-5 text-amber-400" /> Save It and Print It!
             </h3>
             <p className="text-slate-300 mt-2 leading-relaxed">
-              Once everything looks good in the preview at the bottom, just click the big <strong>Print / PDF</strong> button up in the top right corner. 
-              The app will pop open a clean, white, printable sheet and open your browser's print menu. From there, you can print it to paper or save it as a PDF. The app takes care of formatting it nicely for you!
+              Once everything looks good in the preview at the bottom, use the two buttons in the top right corner. <strong>Save to Drive</strong> files a PDF of the proposal, and an editable copy you can open again later, in that job's folder in Google Drive. <strong>Print</strong> does the same, then opens your browser's print menu so you can print it to paper. 
+              The first time, the app asks which job the proposal belongs to (or it already knows, if you started from Load Job Information). Saving again replaces the earlier copy, so the folder always holds the latest. To open a saved proposal later, use <strong>Load Job Information</strong> and tap <strong>Open saved proposal</strong> on the job.
             </p>
           </div>
         </section>

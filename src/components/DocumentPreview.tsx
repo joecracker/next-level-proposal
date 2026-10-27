@@ -1,6 +1,6 @@
 import React from 'react';
 import { Proposal } from '../types';
-import { Edit3 } from 'lucide-react';
+import { Edit3, CloudUpload } from 'lucide-react';
 import { triggerSafePrint } from '../printUtils';
 import { formatMoneyPlain, parseMoneyToCents } from '../lib/money';
 import { CompanyHeader } from './CompanyHeader';
@@ -11,6 +11,8 @@ interface DocumentPreviewProps {
   onEditSection: (sectionIndex: number) => void;
   onOpenCategoryModal?: (category: any) => void;
   onPrint?: () => void;
+  /** Files the PDF and the editable copy in the job's Google Drive folder. */
+  onSaveToDrive?: () => void;
   onSaveAndFinish?: () => void;
 }
 
@@ -25,6 +27,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   onEditSection,
   onOpenCategoryModal,
   onPrint,
+  onSaveToDrive,
   onSaveAndFinish,
 }) => {
   const { companyConfig, clientInfo, categories, legalTerms, totalEstimate, notes } = proposal;
@@ -56,11 +59,22 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
               <span>Save & Finish</span>
             </button>
           )}
+          {onSaveToDrive && (
+            <button
+              onClick={onSaveToDrive}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600 font-bold px-5 py-2.5 rounded-xl shadow-lg text-sm flex items-center space-x-2 transition-all cursor-pointer"
+              title="File the PDF and the editable copy in this job's Google Drive folder"
+            >
+              <CloudUpload className="w-4 h-4" />
+              <span>Save to Drive</span>
+            </button>
+          )}
           <button
             onClick={handlePrint}
             className="bg-brass hover:bg-brass/90 text-brass-foreground font-bold px-6 py-2.5 rounded-xl shadow-lg text-sm flex items-center space-x-2 transition-all cursor-pointer"
+            title={onSaveToDrive ? 'File it in Google Drive, then print' : 'Print'}
           >
-            <span>Print / PDF</span>
+            <span>Print</span>
           </button>
         </div>
       </div>

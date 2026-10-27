@@ -14,11 +14,13 @@ import {
   driveConfigured,
   isDriveConnected,
   connectGoogleDrive,
-  listEstimateJobs,
+  listLoadableJobs,
   downloadEstimateFile,
-  type DriveJobEntry,
+  readSavedProposal,
+  type LoadableJob,
 } from '../lib/driveJobs';
 import { driveError } from '../lib/driveError';
+import type { Proposal, ProposalDriveJob } from '../types';
 import { dollarsToCents, formatMoneyPlain, paymentScheduleCents } from '../lib/money';
 
 /** What the app needs handed back once the info is approved. */
@@ -36,6 +38,8 @@ export interface EstimateImportResult {
   jobDescription: string | null;
   /** Starred materials, in sheet order. Names only - never a price. */
   materials: string[];
+  /** The Google Drive job the estimate came from (null when it was picked as a file on this computer). */
+  driveJob: ProposalDriveJob | null;
 }
 
 interface EstimateImportModalProps {
@@ -50,6 +54,8 @@ interface EstimateImportModalProps {
   updateOnly?: boolean;
   /** The payment amounts on the proposal right now, for the before/after view. */
   currentPayments?: { dueAtSigning: string; dueAtStart: string; dueUponCompletion: string };
+  /** A proposal saved in a job's Drive folder was chosen: open it as it was saved. */
+  onOpenSavedProposal: (proposal: Proposal) => void;
 }
 
 const asMoney = (cents: number) => `$${formatMoneyPlain(cents)}`;
@@ -62,6 +68,7 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
   onClose,
   updateOnly = false,
   currentPayments,
+  onOpenSavedProposal,
 }) => {
   const [fileName, setFileName] = useState<string | null>(null);
   const [isReading, setIsReading] = useState(false);
@@ -119,7 +126,9 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
   // Google Drive: the estimates XL has filed in each job's folder.
   // Google Drive is the main way in, so its list starts open.
   const [driveOpen, setDriveOpen] = useState(driveConfigured);
-  const [driveJobs, setDriveJobs] = useState<DriveJobEntry[] | null>(null);
+  const [driveJobs, setDriveJobs] = useState<LoadableJob[] | null>(null);
+  // The Drive job the estimate was read from, so the proposal can file its PDF in that job's folder.
+  const [pickedJob, setPickedJob] = useState<ProposalDriveJob | null>(null);
   const [driveBusy, setDriveBusy] = useState(false);
   const [driveMsg, setDriveMsg] = useState<string | null>(null);
 
@@ -128,7 +137,7 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
     setDriveMsg(null);
     try {
       if (!isDriveConnected()) await connectGoogleDrive();
-      setDriveJobs(await listEstimateJobs());
+      setDriveJobs(await listLoadableJobs());
     } catch (err) {
       setDriveMsg(driveError(err));
     }
@@ -141,17 +150,42 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const pickDriveJob = async (job: DriveJobEntry) => {
+  const pickDriveJob = async (job: LoadableJob) => {
     setDriveBusy(true);
     setDriveMsg(null);
     try {
       const file = await downloadEstimateFile(job);
+      setPickedJob({ jobId: job.jobId, name: job.name, folderId: job.folderId });
       setDriveOpen(false);
       await handleFile(file);
     } catch (err) {
       setDriveMsg(driveError(err));
     }
     setDriveBusy(false);
+  };
+
+  // A proposal already saved in the job's Drive folder: open it as it was saved.
+  const openSavedProposal = async (job: LoadableJob) => {
+    if (!job.proposalFileId) return;
+    setDriveBusy(true);
+    setDriveMsg(null);
+    try {
+      const saved = await readSavedProposal(job.proposalFileId);
+      onOpenSavedProposal({
+        ...saved,
+        driveJob: saved.driveJob ?? { jobId: job.jobId, name: job.name, folderId: job.folderId },
+      });
+    } catch (err) {
+      setDriveMsg(driveError(err));
+    }
+    setDriveBusy(false);
+  };
+
+  // A file picked on this computer has no Drive job behind it.
+  const handleFileFromComputer = (file: File | undefined) => {
+    if (!file) return;
+    setPickedJob(null);
+    void handleFile(file);
   };
 
   const handleApply = () => {
@@ -168,6 +202,7 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
       customerEmail: updateOnly ? null : found.customerEmail,
       jobDescription: updateOnly ? null : found.jobDescription,
       materials: updateOnly && !replaceMaterials ? [] : starred.map((item) => item.name),
+      driveJob: pickedJob,
     }, updating ? 'update' : 'new');
   };
 
@@ -219,7 +254,7 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
             <div>
               <div className="text-sm font-bold text-white">From Google Drive</div>
               <div className="text-[11px] text-slate-400">
-                The estimates XL filed in each job's folder. No file hunting.
+                The estimates XL filed, and the proposals you saved, in each job's folder. No file hunting.
               </div>
             </div>
             <button
@@ -257,30 +292,67 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
               )}
               {driveJobs !== null && driveJobs.length === 0 && !driveBusy && (
                 <p className="text-xs text-slate-400">
-                  No estimates in Drive yet. In XL, open the job from Google Drive, then export it.
+                  No estimates or saved proposals in Drive yet. In XL, open the job from Google Drive, then export it.
                 </p>
               )}
               {driveJobs !== null &&
-                driveJobs.map((job) => (
-                  <button
-                    key={job.fileId}
-                    type="button"
-                    disabled={driveBusy}
-                    onClick={() => void pickDriveJob(job)}
-                    className="w-full text-left rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 px-4 py-3 disabled:opacity-60 cursor-pointer"
-                  >
-                    <div className="text-sm font-bold text-slate-100">{job.name}</div>
-                    <div className="text-[11px] text-slate-400">
-                      Saved{' '}
-                      {new Date(job.modified).toLocaleString([], {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}
-                    </div>
-                  </button>
-                ))}
+                driveJobs
+                  .filter((job) => !updateOnly || job.estimateFileId)
+                  .map((job) => {
+                    const when = (
+                      <div className="text-[11px] text-slate-400">
+                        Saved{' '}
+                        {new Date(job.modified).toLocaleString([], {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                        })}
+                      </div>
+                    );
+                    // Only an estimate: the whole row picks it, as before.
+                    if (!job.proposalFileId || updateOnly) {
+                      return (
+                        <button
+                          key={job.fileId}
+                          type="button"
+                          disabled={driveBusy}
+                          onClick={() => void pickDriveJob(job)}
+                          className="w-full text-left rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 px-4 py-3 disabled:opacity-60 cursor-pointer"
+                        >
+                          <div className="text-sm font-bold text-slate-100">{job.name}</div>
+                          {when}
+                        </button>
+                      );
+                    }
+                    // A proposal was already saved for this job: open it, or start over from the estimate.
+                    return (
+                      <div key={job.fileId} className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3">
+                        <div className="text-sm font-bold text-slate-100">{job.name}</div>
+                        {when}
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          <button
+                            type="button"
+                            disabled={driveBusy}
+                            onClick={() => void openSavedProposal(job)}
+                            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs disabled:opacity-60 cursor-pointer"
+                          >
+                            Open saved proposal
+                          </button>
+                          {job.estimateFileId && (
+                            <button
+                              type="button"
+                              disabled={driveBusy}
+                              onClick={() => void pickDriveJob(job)}
+                              className="bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold px-3 py-1.5 rounded-lg text-xs border border-slate-700 disabled:opacity-60 cursor-pointer"
+                            >
+                              Start a new proposal from the estimate
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
             </div>
           )}
         </div>
@@ -291,7 +363,7 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
           e.preventDefault();
-          void handleFile(e.dataTransfer.files?.[0]);
+          handleFileFromComputer(e.dataTransfer.files?.[0]);
         }}
         className="border-2 border-dashed border-slate-700 hover:border-amber-500 rounded-2xl p-6 text-center space-y-3 bg-slate-950/50 transition-all"
       >
@@ -302,7 +374,7 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
             <input
               type="file"
               accept=".xlsx"
-              onChange={(e) => void handleFile(e.target.files?.[0])}
+              onChange={(e) => handleFileFromComputer(e.target.files?.[0])}
               className="hidden"
             />
           </label>

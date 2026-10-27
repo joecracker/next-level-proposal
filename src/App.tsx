@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles } from 'lucide-react';
-import { Proposal, ViewMode, ScopeCategory, CompanyConfig } from './types';
+import { Proposal, ProposalDriveJob, ViewMode, ScopeCategory, CompanyConfig } from './types';
 import { SAMPLE_PROPOSAL, DEFAULT_CATEGORIES, DEFAULT_COMPANY_CONFIG, DEFAULT_LEGAL_TERMS, normalizeCategories } from './data/defaultTemplate';
 import { Header } from './components/Header';
 import { Launcher } from './components/Launcher';
@@ -23,9 +23,13 @@ import { ProposalsList } from './components/ProposalsList';
 import { CategoryModal } from './components/CategoryModal';
 import { HowToView } from './components/HowToView';
 import { BackupMenu } from './components/BackupMenu';
+import { DriveJobPicker } from './components/DriveJobPicker';
 import { isBlankProposal } from './lib/blankProposal';
 import { proposalDisplayName } from './lib/proposalName';
 import { triggerSafePrint } from './printUtils';
+import { buildProposalPdf } from './lib/proposalPdf';
+import { driveConfigured, isDriveConnected, connectGoogleDrive, fileProposal } from './lib/driveJobs';
+import { driveError } from './lib/driveError';
 import { splitPaymentSchedule } from './lib/money';
 
 const STORAGE_KEY_PROPOSAL = 'jqc_active_proposal_v1';
@@ -137,6 +141,13 @@ export default function App() {
   // open proposal (update just its price and payments). Remember which, and where to go back to.
   const [estimateUpdateOnly, setEstimateUpdateOnly] = useState<boolean>(false);
   const [estimateReturnView, setEstimateReturnView] = useState<ViewMode>('wizard');
+  // Save to Drive / Print: the PDF and the editable copy are filed in the job's Drive folder.
+  const [driveToast, setDriveToast] = useState<{ text: string; warn: boolean } | null>(null);
+  const driveToastTimer = useRef<number | undefined>(undefined);
+  const [pickerFor, setPickerFor] = useState<null | 'save' | 'print'>(null);
+  const [filing, setFiling] = useState(false);
+  const viewRef = useRef<ViewMode>(currentView);
+  viewRef.current = currentView;
 
   // Guardrail navigation: advance the "furthest reached" marker whenever we
   // move forward, so locked steps unlock one at a time.
@@ -301,6 +312,95 @@ export default function App() {
     setCurrentView('home');
   };
 
+  // ---- Save to Drive and Print: both file the PDF and the editable copy in the job's Drive folder ----
+  const showDriveToast = (text: string, warn = false, ms = 7000) => {
+    window.clearTimeout(driveToastTimer.current);
+    setDriveToast({ text, warn });
+    if (ms > 0) driveToastTimer.current = window.setTimeout(() => setDriveToast(null), ms);
+  };
+
+  // The PDF and the printout both come from the full preview, so make sure it is on screen.
+  const showPreview = async () => {
+    if (viewRef.current !== 'preview') {
+      setCurrentView('preview');
+      await new Promise((r) => setTimeout(r, 700));
+    }
+    for (let i = 0; i < 30 && !document.querySelector('.printable-sheet'); i++) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+  };
+
+  const printNow = async () => {
+    await showPreview();
+    triggerSafePrint(proposalRef.current);
+  };
+
+  const rememberJob = (job: ProposalDriveJob) => {
+    const id = proposalRef.current.id;
+    setProposal((prev) => (prev.id === id ? { ...prev, driveJob: job } : prev));
+    setSavedProposals((prev) => prev.map((p) => (p.id === id ? { ...p, driveJob: job } : p)));
+  };
+
+  /**
+   * Both buttons do this: make the PDF and file it, with the editable copy, in the job's Drive folder.
+   * Print then prints as it always has. Nothing here ever stops a print: if Drive is not available it says
+   * so and prints anyway.
+   */
+  const fileToDrive = async (andPrint: boolean, jobOverride?: ProposalDriveJob) => {
+    if (filing) return;
+    const job = jobOverride ?? proposalRef.current.driveJob;
+    if (!driveConfigured) {
+      showDriveToast("Google Drive isn't set up in this copy of the app, so nothing was filed.", true);
+      if (andPrint) await printNow();
+      return;
+    }
+    if (!job) {
+      setPickerFor(andPrint ? 'print' : 'save'); // ask which job it belongs to (remembered after that)
+      return;
+    }
+    setFiling(true);
+    try {
+      if (!isDriveConnected()) await connectGoogleDrive(); // first, while the sign-in window is still allowed to open
+      showDriveToast('Saving to Google Drive...', false, 0);
+      await showPreview();
+      const live = proposalRef.current;
+      const pdf = await buildProposalPdf(`${proposalDisplayName(live)} - Proposal`);
+      const toFile: Proposal = andPrint ? { ...live, status: 'completed' } : live;
+      const resolved = await fileProposal(job, toFile, pdf);
+      rememberJob(resolved);
+      showDriveToast(`Saved in Google Drive, in the "${resolved.name}" folder: Proposal.pdf and the editable copy.`);
+    } catch (err) {
+      showDriveToast(`Could not save to Google Drive. ${driveError(err)}${andPrint ? ' Printing anyway.' : ''}`, true, 12000);
+    }
+    setFiling(false);
+    if (andPrint) await printNow();
+  };
+
+  // A proposal saved in a job's Drive folder was chosen on the Load Job Information screen.
+  const handleOpenSavedProposal = (saved: Proposal) => {
+    const restored: Proposal = {
+      ...saved,
+      companyConfig: saved.companyConfig || DEFAULT_COMPANY_CONFIG,
+      legalTerms: saved.legalTerms || DEFAULT_LEGAL_TERMS,
+      categories: normalizeCategories(saved.categories),
+    };
+    const here = proposal.id === restored.id || savedProposals.some((p) => p.id === restored.id);
+    if (
+      here &&
+      !window.confirm('This replaces the copy of this proposal on this computer with the one saved in Google Drive. Continue?')
+    ) {
+      return;
+    }
+    setProposal(restored);
+    setSavedProposals((prev) => [restored, ...prev.filter((p) => p.id !== restored.id && !isBlankProposal(p))]);
+    setIsSaved(true);
+    setPowerMode(false);
+    const step = resumeStepFor(restored);
+    setCurrentStepIndex(step);
+    setMaxReachedStep(step);
+    setCurrentView('wizard');
+  };
+
   const handleSaveCompanyProfile = (newConfig: CompanyConfig) => {
     setCompanyProfile(newConfig);
     handleUpdateProposal({
@@ -438,6 +538,8 @@ export default function App() {
         proposal={proposal}
         onNewProposal={handleNewProposal}
         onSaveProposal={handleSaveAndFinish}
+        onSaveToDrive={() => void fileToDrive(false)}
+        onPrint={() => void fileToDrive(true)}
         isSaved={isSaved}
         onUpdateFromExcel={
           isBlankProposal(proposal)
@@ -581,10 +683,8 @@ export default function App() {
                       onEditSection={(idx) => goToStep(idx)}
                       onOpenCategoryModal={(cat) => setActiveModalCategory(cat)}
                       onSaveAndFinish={handleSaveAndFinish}
-                      onPrint={() => {
-                        setCurrentView('preview');
-                        setTimeout(() => triggerSafePrint(proposal), 700);
-                      }}
+                      onPrint={() => void fileToDrive(true)}
+                      onSaveToDrive={() => void fileToDrive(false)}
                     />
                     <ContractForms proposal={proposal} />
                   </>
@@ -609,6 +709,8 @@ export default function App() {
               }}
               onOpenCategoryModal={(cat) => setActiveModalCategory(cat)}
               onSaveAndFinish={handleSaveAndFinish}
+              onPrint={() => void fileToDrive(true)}
+              onSaveToDrive={() => void fileToDrive(false)}
             />
             <ContractForms proposal={proposal} />
           </>
@@ -654,6 +756,7 @@ export default function App() {
             existingName={isBlankProposal(proposal) ? null : proposalDisplayName(proposal)}
             currentTotal={proposal.totalEstimate || ''}
             updateOnly={estimateUpdateOnly}
+            onOpenSavedProposal={handleOpenSavedProposal}
             currentPayments={{
               dueAtSigning: String(proposal.legalTerms?.dueAtSigning ?? ''),
               dueAtStart: String(proposal.legalTerms?.dueAtStart ?? ''),
@@ -669,6 +772,8 @@ export default function App() {
               const filled: Proposal = {
                 ...base,
                 status: 'draft',
+                // Picked from Google Drive: remember the job, so the PDF is filed in its folder.
+                driveJob: result.driveJob ?? base.driveJob,
                 title: result.customerName ? `${result.customerName} Proposal` : base.title,
                 totalEstimate: result.totalEstimate,
                 // Each Excel cell lands in its matching slot. An empty cell on the sheet leaves
@@ -751,6 +856,39 @@ export default function App() {
         >
           {finishedToast}
         </div>
+      )}
+      {driveToast && (
+        <div
+          role="status"
+          className={
+            'fixed top-36 left-1/2 -translate-x-1/2 z-[65] print:hidden max-w-[92vw] rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl ' +
+            (driveToast.warn
+              ? 'border-amber-500/60 bg-amber-950/95 text-amber-100'
+              : 'border-emerald-500/60 bg-emerald-950/95 text-emerald-100')
+          }
+        >
+          {driveToast.text}
+        </div>
+      )}
+      {pickerFor && (
+        <DriveJobPicker
+          title={pickerFor === 'print' ? 'Which job is this proposal for?' : 'Which job should this proposal be saved to?'}
+          skipLabel={pickerFor === 'print' ? 'Print without saving to Drive' : undefined}
+          onPick={(job) => {
+            const andPrint = pickerFor === 'print';
+            setPickerFor(null);
+            void fileToDrive(andPrint, job);
+          }}
+          onSkip={
+            pickerFor === 'print'
+              ? () => {
+                  setPickerFor(null);
+                  void printNow();
+                }
+              : undefined
+          }
+          onCancel={() => setPickerFor(null)}
+        />
       )}
       <BackupMenu
         proposal={proposal}
