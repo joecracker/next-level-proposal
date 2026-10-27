@@ -45,7 +45,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
           className="bg-slate-900 hover:bg-slate-800 text-slate-200 border border-amber-500/30 shadow-lg px-4 py-2.5 rounded-xl text-sm font-bold flex items-center space-x-2 transition-all cursor-pointer"
         >
           <Edit3 className="w-4 h-4 text-amber-400" />
-          <span>Edit Sections</span>
+          <span>Edit proposal</span>
         </button>
         <div className="flex items-center gap-3">
           {onSaveAndFinish && (

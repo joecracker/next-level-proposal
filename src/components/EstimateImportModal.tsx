@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FileSpreadsheet,
   Upload,
@@ -46,6 +46,10 @@ interface EstimateImportModalProps {
   materialsSectionCount: number | null;
   onApply: (result: EstimateImportResult, mode: 'new' | 'update') => void;
   onClose: () => void;
+  /** Opened from inside a proposal: only the price and payments are updated, never a new proposal. */
+  updateOnly?: boolean;
+  /** The payment amounts on the proposal right now, for the before/after view. */
+  currentPayments?: { dueAtSigning: string; dueAtStart: string; dueUponCompletion: string };
 }
 
 const asMoney = (cents: number) => `$${formatMoneyPlain(cents)}`;
@@ -56,14 +60,18 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
   materialsSectionCount,
   onApply,
   onClose,
+  updateOnly = false,
+  currentPayments,
 }) => {
   const [fileName, setFileName] = useState<string | null>(null);
   const [isReading, setIsReading] = useState(false);
   const [readError, setReadError] = useState<string | null>(null);
   const [found, setFound] = useState<EstimateRead | null>(null);
   // New proposal is always the starting choice, so an import can never silently overwrite a job.
-  const [mode, setMode] = useState<'new' | 'update'>('new');
-  const updating = mode === 'update' && existingName !== null;
+  const [mode, setMode] = useState<'new' | 'update'>(updateOnly ? 'update' : 'new');
+  const updating = (updateOnly || mode === 'update') && existingName !== null;
+  // Update-only: the proposal's materials list is kept as written unless this box is ticked.
+  const [replaceMaterials, setReplaceMaterials] = useState(false);
 
   // The sheet hands back dollars and cents (1826.769232). Everything on this screen works in
   // whole cents, so the moment the file is read we switch to cents and stay there.
@@ -109,7 +117,8 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
   };
 
   // Google Drive: the estimates XL has filed in each job's folder.
-  const [driveOpen, setDriveOpen] = useState(false);
+  // Google Drive is the main way in, so its list starts open.
+  const [driveOpen, setDriveOpen] = useState(driveConfigured);
   const [driveJobs, setDriveJobs] = useState<DriveJobEntry[] | null>(null);
   const [driveBusy, setDriveBusy] = useState(false);
   const [driveMsg, setDriveMsg] = useState<string | null>(null);
@@ -125,6 +134,12 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
     }
     setDriveBusy(false);
   };
+
+  // Already signed in to Google on this device: show the job list straight away.
+  useEffect(() => {
+    if (driveConfigured && isDriveConnected()) void loadDriveJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const pickDriveJob = async (job: DriveJobEntry) => {
     setDriveBusy(true);
@@ -146,14 +161,27 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
       dueAtSigning: payments.dueAtSigning,
       dueAtStart: payments.dueAtStart,
       dueUponCompletion: payments.dueUponCompletion,
-      customerName: found.customerName,
-      customerAddress: found.customerAddress,
-      customerPhone: found.customerPhone,
-      customerEmail: found.customerEmail,
-      jobDescription: found.jobDescription,
-      materials: starred.map((item) => item.name),
+      // Update-only touches the total and payments (and the materials list only if ticked).
+      customerName: updateOnly ? null : found.customerName,
+      customerAddress: updateOnly ? null : found.customerAddress,
+      customerPhone: updateOnly ? null : found.customerPhone,
+      customerEmail: updateOnly ? null : found.customerEmail,
+      jobDescription: updateOnly ? null : found.jobDescription,
+      materials: updateOnly && !replaceMaterials ? [] : starred.map((item) => item.name),
     }, updating ? 'update' : 'new');
   };
+
+  // Update-only: what the proposal says now next to what the sheet says.
+  const sameMoney = (a: string, b: string) => a.replace(/[$,\s]/g, '') === b.replace(/[$,\s]/g, '');
+  const changeRows: Array<[string, string, string]> =
+    updateOnly && payments && totalCents !== null
+      ? [
+          ['Total', currentTotal || '', formatMoneyPlain(totalCents)],
+          ['Due at signing', currentPayments?.dueAtSigning ?? '', payments.dueAtSigning],
+          ['Due at start of job', currentPayments?.dueAtStart ?? '', payments.dueAtStart],
+          ['Due on completion', currentPayments?.dueUponCompletion ?? '', payments.dueUponCompletion],
+        ]
+      : [];
 
   const infoRows: Array<[string, string | null]> = found
     ? [
@@ -170,15 +198,17 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
       {/* Header */}
       <div className="border-b border-slate-800 pb-4">
         <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-          <FileSpreadsheet className="w-4 h-4" /> Load From Excel
+          <FileSpreadsheet className="w-4 h-4" /> {updateOnly ? 'Update From Excel' : 'Load Job Information'}
         </span>
         <h2 className="text-xl sm:text-2xl font-bold text-white mt-1">
-          Pull Your Job Info and Numbers Straight Off the Estimate Sheet
+          {updateOnly
+            ? 'Refresh the Price and Payments From the Estimate Sheet'
+            : 'Pull Your Job Info and Numbers Straight Off the Estimate Sheet'}
         </h2>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          Drop in the saved estimate file. The app reads the customer info, the materials you starred
-          (*), the total, and the payment schedule. Numbers come across exactly as they are in the
-          sheet, and nothing in your spreadsheet gets changed.
+          {updateOnly
+            ? 'Pick the updated estimate. Only the total and the payment amounts on this proposal change. Your customer info and everything you wrote stay as they are, and nothing in your spreadsheet gets changed.'
+            : 'Drop in the saved estimate file. The app reads the customer info, the materials you starred (*), the total, and the payment schedule. Numbers come across exactly as they are in the sheet, and nothing in your spreadsheet gets changed.'}
         </p>
       </div>
 
@@ -265,10 +295,10 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
         }}
         className="border-2 border-dashed border-slate-700 hover:border-amber-500 rounded-2xl p-6 text-center space-y-3 bg-slate-950/50 transition-all"
       >
-        <Upload className="w-8 h-8 text-amber-400 mx-auto" />
+        <Upload className="w-6 h-6 text-slate-400 mx-auto" />
         <div>
           <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold px-4 py-2 rounded-xl border border-slate-700 inline-block transition-colors">
-            Choose Your Estimate File (.xlsx)
+            From a file on this computer (.xlsx)
             <input
               type="file"
               accept=".xlsx"
@@ -391,12 +421,27 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
               ) : (
                 <p className="text-xs text-slate-500 italic">None found.</p>
               )}
-              {updating && starred.length > 0 && materialsSectionCount === null && (
+              {updateOnly && starred.length > 0 && materialsSectionCount !== null && (
+                <label className="flex items-start gap-2 text-xs text-slate-200 cursor-pointer pt-1">
+                  <input
+                    type="checkbox"
+                    checked={replaceMaterials}
+                    onChange={(e) => setReplaceMaterials(e.target.checked)}
+                    className="mt-0.5 accent-amber-500"
+                  />
+                  <span>
+                    Also replace the {materialsSectionCount} line{materialsSectionCount === 1 ? '' : 's'} now in this
+                    proposal's Material description section with these starred materials. Leave this unticked to keep
+                    your wording as it is.
+                  </span>
+                </label>
+              )}
+              {updating && !updateOnly && starred.length > 0 && materialsSectionCount === null && (
                 <p className="text-[11px] text-amber-300">
                   This proposal has no "Material description" section, so these won't be added.
                 </p>
               )}
-              {updating && starred.length > 0 && materialsSectionCount !== null && materialsSectionCount > 0 && (
+              {updating && !updateOnly && starred.length > 0 && materialsSectionCount !== null && materialsSectionCount > 0 && (
                 <p className="text-[11px] text-slate-400">
                   This will replace the {materialsSectionCount} line{materialsSectionCount === 1 ? '' : 's'}{' '}
                   now in the Material description section.
@@ -415,7 +460,7 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
             </div>
           )}
 
-          {existingName !== null && (
+          {existingName !== null && !updateOnly && (
             <div className="bg-slate-950 border border-slate-700 rounded-xl p-4 space-y-2">
               <div className="text-xs font-semibold text-amber-300">Where should this go?</div>
               <button
@@ -443,7 +488,35 @@ export const EstimateImportModal: React.FC<EstimateImportModalProps> = ({
             </div>
           )}
 
-          {updating && currentTotal && (            <p className="text-[11px] text-slate-400">
+          {changeRows.length > 0 && (
+            <div className="bg-slate-950 border border-slate-700 rounded-xl p-4 space-y-2">
+              <div className="text-xs font-semibold text-amber-300">What will change on this proposal</div>
+              <div className="space-y-1.5">
+                {changeRows.map(([label, was, now]) => {
+                  const unchanged = was !== '' && sameMoney(was, now);
+                  return (
+                    <div key={label} className="flex items-baseline justify-between gap-3 text-xs">
+                      <span className="text-slate-300">{label}</span>
+                      <span className="text-right">
+                        {unchanged ? (
+                          <span className="text-slate-400">${now} &mdash; no change</span>
+                        ) : (
+                          <>
+                            {was !== '' && (
+                              <span className="text-slate-500 line-through mr-2">${was.replace('$', '')}</span>
+                            )}
+                            <span className="text-amber-300 font-bold">${now}</span>
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {updating && !updateOnly && currentTotal && (            <p className="text-[11px] text-slate-400">
               This will replace the total that's on the proposal right now (${currentTotal.replace('$', '')}).
             </p>
           )}

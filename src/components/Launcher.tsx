@@ -71,8 +71,8 @@ export const Launcher: React.FC<LauncherProps> = ({
             <FileSpreadsheet className="w-9 h-9 text-amber-400 mx-auto" />
           </span>
           <span>
-            Load From Excel
-            <div className={sub}>Read the job numbers off your estimate sheet</div>
+            Load Job Information
+            <div className={sub}>From Google Drive, or from a file on this computer</div>
           </span>
         </button>
 

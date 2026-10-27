@@ -12,6 +12,7 @@ import {
   Sparkles,
   RefreshCw,
   HelpCircle,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -23,6 +24,8 @@ interface HeaderProps {
   isSaved: boolean;
   /** True on the final review screen, where Save & Finish turns green. */
   readyToFinish?: boolean;
+  /** Given only while a real proposal is open: opens the update-the-numbers-from-Excel screen. */
+  onUpdateFromExcel?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -33,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSaveProposal,
   isSaved,
   readyToFinish = false,
+  onUpdateFromExcel,
 }) => {
   const handlePrint = () => {
     // Only the full preview screen prints correctly, so go there first.
@@ -76,8 +80,19 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               <FileText className="w-4 h-4" />
-              <span>Build Proposal</span>
+              <span>Build / Edit</span>
             </button>
+
+            {onUpdateFromExcel && (
+              <button
+                onClick={onUpdateFromExcel}
+                className="flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-300 hover:text-white hover:bg-slate-700/50"
+                title="Bring the new price and payments in from the updated Excel estimate"
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                <span>Update from Excel</span>
+              </button>
+            )}
 
 
             <button
@@ -172,8 +187,17 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>Build Proposal</span>
+            <span>Build / Edit</span>
           </button>
+          {onUpdateFromExcel && (
+            <button
+              onClick={onUpdateFromExcel}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap text-slate-300 bg-slate-800"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <span>Update from Excel</span>
+            </button>
+          )}
           <button
             onClick={() => setCurrentView('history')}
             className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap ${

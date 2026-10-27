@@ -13,7 +13,110 @@ import {
   Layers,
   AlertCircle,
   Volume2,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
+import { Reorder, useDragControls } from 'motion/react';
+
+// One line on the proposal. Only the grip handle starts a drag, so the text box still scrolls and
+// edits normally on a tablet or phone. The small arrows do the same move one step at a time.
+interface SectionItemRowProps {
+  item: ScopeItem;
+  idx: number;
+  count: number;
+  isConfirmed: boolean;
+  onTextChange: (itemId: string, newText: string) => void;
+  onDelete: (itemId: string) => void;
+  onMove: (itemId: string, direction: -1 | 1) => void;
+}
+
+const SectionItemRow: React.FC<SectionItemRowProps> = ({
+  item,
+  idx,
+  count,
+  isConfirmed,
+  onTextChange,
+  onDelete,
+  onMove,
+}) => {
+  const controls = useDragControls();
+
+  return (
+    <Reorder.Item
+      as="div"
+      value={item}
+      dragListener={false}
+      dragControls={controls}
+      whileDrag={{ scale: 1.02, boxShadow: '0 10px 28px rgba(0,0,0,0.5)' }}
+      className="bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 rounded-xl p-3 flex items-start space-x-3 transition-colors group"
+    >
+      {!isConfirmed && count > 1 ? (
+        <div className="shrink-0 flex flex-col items-center text-slate-500">
+          <button
+            type="button"
+            onClick={() => onMove(item.id, -1)}
+            disabled={idx === 0}
+            aria-label="Move line up"
+            title="Move up"
+            className="p-0.5 hover:text-amber-400 disabled:opacity-25 disabled:hover:text-slate-500 cursor-pointer"
+          >
+            <ChevronUp className="w-4 h-4" />
+          </button>
+          <div
+            onPointerDown={(e) => controls.start(e)}
+            style={{ touchAction: 'none' }}
+            title="Drag to reorder"
+            aria-label="Drag to reorder"
+            className="p-1 cursor-grab active:cursor-grabbing hover:text-amber-400"
+          >
+            <GripVertical className="w-4 h-4" />
+          </div>
+          <button
+            type="button"
+            onClick={() => onMove(item.id, 1)}
+            disabled={idx === count - 1}
+            aria-label="Move line down"
+            title="Move down"
+            className="p-0.5 hover:text-amber-400 disabled:opacity-25 disabled:hover:text-slate-500 cursor-pointer"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <div className="pt-2 text-slate-500 shrink-0">
+          <GripVertical className="w-4 h-4 opacity-40" />
+        </div>
+      )}
+
+      <div className="pt-2 shrink-0">
+        <span className="w-5 h-5 rounded-md bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center border border-amber-500/30">
+          {idx + 1}
+        </span>
+      </div>
+
+      {isConfirmed ? (
+        <p className="text-xs sm:text-sm text-slate-200 py-1 flex-1 leading-relaxed">{item.text}</p>
+      ) : (
+        <textarea
+          value={item.text}
+          onChange={(e) => onTextChange(item.id, e.target.value)}
+          rows={2}
+          className="flex-1 bg-slate-900/90 border border-slate-700/60 rounded-lg p-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-400 transition-all leading-relaxed"
+        />
+      )}
+
+      {!isConfirmed && (
+        <button
+          onClick={() => onDelete(item.id)}
+          className="p-2 text-slate-500 hover:text-rose-400 hover:bg-slate-700/60 rounded-lg transition-colors shrink-0"
+          title="Remove item"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
+    </Reorder.Item>
+  );
+};
 
 interface CategorySectionStepProps {
   category: ScopeCategory;
@@ -124,6 +227,21 @@ export const CategorySectionStep: React.FC<CategorySectionStepProps> = ({
   };
 
   // Toggle Confirm / OK vs Edit state
+  // Drag finished: keep the new order.
+  const handleReorder = (newItems: ScopeItem[]) => {
+    onUpdateCategory({ ...category, items: newItems });
+  };
+
+  // Arrow buttons: swap a line with its neighbour.
+  const handleMoveItem = (itemId: string, direction: -1 | 1) => {
+    const from = category.items.findIndex((i) => i.id === itemId);
+    const to = from + direction;
+    if (from < 0 || to < 0 || to >= category.items.length) return;
+    const next = [...category.items];
+    [next[from], next[to]] = [next[to], next[from]];
+    onUpdateCategory({ ...category, items: next });
+  };
+
   const handleConfirmOK = () => {
     onUpdateCategory({
       ...category,
@@ -302,47 +420,26 @@ export const CategorySectionStep: React.FC<CategorySectionStepProps> = ({
             </p>
           </div>
         ) : (
-          <div className="space-y-2.5">
+          <Reorder.Group
+            as="div"
+            axis="y"
+            values={category.items}
+            onReorder={handleReorder}
+            className="space-y-2.5"
+          >
             {category.items.map((item, idx) => (
-              <div
+              <SectionItemRow
                 key={item.id}
-                className="bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 rounded-xl p-3 flex items-start space-x-3 transition-all group"
-              >
-                <div className="pt-2 text-slate-500 shrink-0">
-                  <GripVertical className="w-4 h-4" />
-                </div>
-
-                <div className="pt-2 shrink-0">
-                  <span className="w-5 h-5 rounded-md bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center border border-amber-500/30">
-                    {idx + 1}
-                  </span>
-                </div>
-
-                {category.isConfirmed ? (
-                  <p className="text-xs sm:text-sm text-slate-200 py-1 flex-1 leading-relaxed">
-                    {item.text}
-                  </p>
-                ) : (
-                  <textarea
-                    value={item.text}
-                    onChange={(e) => handleItemTextChange(item.id, e.target.value)}
-                    rows={2}
-                    className="flex-1 bg-slate-900/90 border border-slate-700/60 rounded-lg p-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-400 transition-all leading-relaxed"
-                  />
-                )}
-
-                {!category.isConfirmed && (
-                  <button
-                    onClick={() => handleDeleteItem(item.id)}
-                    className="p-2 text-slate-500 hover:text-rose-400 hover:bg-slate-700/60 rounded-lg transition-colors shrink-0"
-                    title="Remove item"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
+                item={item}
+                idx={idx}
+                count={category.items.length}
+                isConfirmed={!!category.isConfirmed}
+                onTextChange={handleItemTextChange}
+                onDelete={handleDeleteItem}
+                onMove={handleMoveItem}
+              />
             ))}
-          </div>
+          </Reorder.Group>
         )}
 
         {/* Quick Add Manual Item Form */}

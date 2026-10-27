@@ -63,6 +63,17 @@ export const cleanWording = (line: string): string =>
       return word[0] === word[0].toUpperCase() ? swap[0].toUpperCase() + swap.slice(1) : swap;
     });
 
+// A materials line names the material only. If the model still starts one with an action
+// ("Furnish and install ...", "Supply ...", "Install ..."), drop the lead-in.
+export const stripActionLead = (line: string): string => {
+  const stripped = line.replace(
+    /^\s*(?:furnish|supply|provide|install)(?:\s+and\s+(?:install|furnish|supply|provide))?\s+(?:new\s+)?/i,
+    ""
+  );
+  if (!stripped || stripped === line) return line;
+  return stripped[0].toUpperCase() + stripped.slice(1);
+};
+
 // Cloudflare infers the PagesFunction type at build time; we type the handler
 // args inline so local tsc and Cloudflare's bundler both accept it.
 export const onRequestPost = async ({
@@ -93,6 +104,15 @@ export const onRequestPost = async ({
       },
     });
 
+    // The proposal's materials list is just a list of materials, not a scope of work.
+    const isMaterials = /material/i.test(categoryName || "");
+    const materialsRules = `
+MATERIALS SECTION (this overrides rules 3 and 7 above): this section is a materials list, not a scope of work.
+- Each line item names ONE material or product only, with its size, type, thickness, finish or quantity when the contractor said them (for example: "1/2 in. moisture-resistant drywall, 12 sheets" or "Waterproofing membrane tape").
+- Do NOT start any line with an action word such as Furnish, Install, Supply, Provide, Remove or Replace, and do not describe the work.
+- Ignore tear-out and labor talk in the notes; that belongs in other sections.
+`;
+
     const prompt = `You are an expert construction project manager and estimator.
 Your job is to take raw voice dictation or casual spoken notes from a contractor and convert them into clear, professional, well-structured line items for a formal construction proposal sheet.
 
@@ -103,12 +123,12 @@ ${currentItems && currentItems.length > 0 ? `Existing Line Items in this section
 Guidelines:
 1. Break down the spoken thoughts into distinct, professional bullet points/line items.
 2. DO NOT require phrases like "drop down to next line" or "bullet point" in the raw text; recognize natural pauses, action verbs, materials, dimensions, and scope changes automatically.
-3. Use precise, clear construction terminology (e.g., "Install 1/2 in. moisture-resistant drywall", "Furnish and install architectural shingles", "Prepare subfloor and tape seams").
+3. Use precise, clear construction terminology (e.g., "Install 1/2 in. moisture-resistant drywall", "Prepare subfloor and tape seams").
 4. If the user mentioned quantities, materials, dimensions, or specific installation instructions, highlight them cleanly.
 5. Keep each line item sharp, concise, and professional.
 6. Return an array of formatted line item strings.
 7. Wording rule: never use the words "demolish", "demolition" or "demo" in a line item. Say "Remove" instead (for example: "Remove existing bathtub and tub surround."). Do not repeat the section name inside the line items.
-
+${isMaterials ? materialsRules : ""}
 Return JSON in this format:
 {
   "formattedItems": [
@@ -145,7 +165,10 @@ Return JSON in this format:
 
     return Response.json({
       success: true,
-      formattedItems: (parsed.formattedItems || []).map((item: string) => cleanWording(String(item))),
+      formattedItems: (parsed.formattedItems || []).map((item: string) => {
+        const cleaned = cleanWording(String(item));
+        return isMaterials ? stripActionLead(cleaned) : cleaned;
+      }),
       summary: parsed.summary || "Items formatted successfully",
     });
   } catch (error) {

@@ -133,6 +133,10 @@ export default function App() {
   const [maxReachedStep, setMaxReachedStep] = useState<number>(0);
   const [powerMode, setPowerMode] = useState<boolean>(false);
   const [isSaved, setIsSaved] = useState<boolean>(true);
+  // The Excel screen can be opened two ways: from the opening page (load a job) or from inside an
+  // open proposal (update just its price and payments). Remember which, and where to go back to.
+  const [estimateUpdateOnly, setEstimateUpdateOnly] = useState<boolean>(false);
+  const [estimateReturnView, setEstimateReturnView] = useState<ViewMode>('wizard');
 
   // Guardrail navigation: advance the "furthest reached" marker whenever we
   // move forward, so locked steps unlock one at a time.
@@ -435,6 +439,15 @@ export default function App() {
         onNewProposal={handleNewProposal}
         onSaveProposal={handleSaveAndFinish}
         isSaved={isSaved}
+        onUpdateFromExcel={
+          isBlankProposal(proposal)
+            ? undefined
+            : () => {
+                setEstimateUpdateOnly(true);
+                setEstimateReturnView(currentView === 'preview' ? 'preview' : 'wizard');
+                setCurrentView('estimate');
+              }
+        }
         readyToFinish={
           currentView === 'preview' ||
           (currentView === 'wizard' && currentStepIndex === proposal.categories.length + 2)
@@ -452,7 +465,10 @@ export default function App() {
             pastCount={pastCount}
             onNewProposal={handleNewProposal}
             onOpenInProgress={handleOpenInProgress}
-            onLoadFromExcel={() => setCurrentView('estimate')}
+            onLoadFromExcel={() => {
+              setEstimateUpdateOnly(false);
+              setCurrentView('estimate');
+            }}
             onOpenPast={() => setCurrentView('history')}
             onCompanyProfile={() => setCurrentView('settings')}
             onHowTo={() => setCurrentView('howto')}
@@ -637,6 +653,12 @@ export default function App() {
           <EstimateImportModal
             existingName={isBlankProposal(proposal) ? null : proposalDisplayName(proposal)}
             currentTotal={proposal.totalEstimate || ''}
+            updateOnly={estimateUpdateOnly}
+            currentPayments={{
+              dueAtSigning: String(proposal.legalTerms?.dueAtSigning ?? ''),
+              dueAtStart: String(proposal.legalTerms?.dueAtStart ?? ''),
+              dueUponCompletion: String(proposal.legalTerms?.dueUponCompletion ?? ''),
+            }}
             materialsSectionCount={
               proposal.categories.find((c) => c.name === 'Material description')?.items.length ?? null
             }
@@ -693,7 +715,8 @@ export default function App() {
                 goToStep(nextStep);
               }
               setCurrentView('wizard');
-            }}            onClose={() => setCurrentView('home')}
+            }}
+            onClose={() => setCurrentView(estimateUpdateOnly ? estimateReturnView : 'home')}
           />
         )}
 
