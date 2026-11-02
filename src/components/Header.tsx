@@ -14,7 +14,6 @@ import {
   RefreshCw,
   HelpCircle,
   FileSpreadsheet,
-  Images,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -32,8 +31,6 @@ interface HeaderProps {
   readyToFinish?: boolean;
   /** Given only while a real proposal is open: opens the update-the-numbers-from-Excel screen. */
   onUpdateFromExcel?: () => void;
-  /** Opens the side panel with the job's description, pictures and files from its Google Drive folder. */
-  onOpenJobFolder?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -47,7 +44,6 @@ export const Header: React.FC<HeaderProps> = ({
   isSaved,
   readyToFinish = false,
   onUpdateFromExcel,
-  onOpenJobFolder,
 }) => {
   const handlePrint = () => {
     if (onPrint) {
@@ -98,18 +94,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Build / Edit</span>
             </button>
 
-            {onOpenJobFolder && (
-              <button
-                onClick={onOpenJobFolder}
-                className="flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-300 hover:text-white hover:bg-slate-700/50"
-                title="See the job's description and pictures from its Google Drive folder"
-              >
-                <Images className="w-4 h-4" />
-                <span>Job folder</span>
-              </button>
-            )}
-
-{onUpdateFromExcel && (
+            {onUpdateFromExcel && (
               <button
                 onClick={onUpdateFromExcel}
                 className="flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-300 hover:text-white hover:bg-slate-700/50"
@@ -226,16 +211,7 @@ export const Header: React.FC<HeaderProps> = ({
             <FileText className="w-3.5 h-3.5" />
             <span>Build / Edit</span>
           </button>
-          {onOpenJobFolder && (
-            <button
-              onClick={onOpenJobFolder}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap text-slate-300 bg-slate-800"
-            >
-              <Images className="w-3.5 h-3.5" />
-              <span>Job folder</span>
-            </button>
-          )}
-{onUpdateFromExcel && (
+          {onUpdateFromExcel && (
             <button
               onClick={onUpdateFromExcel}
               className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap text-slate-300 bg-slate-800"

@@ -24,7 +24,7 @@ import { CategoryModal } from './components/CategoryModal';
 import { HowToView } from './components/HowToView';
 import { BackupMenu } from './components/BackupMenu';
 import { DriveJobPicker } from './components/DriveJobPicker';
-import { JobFolderPanel } from './components/JobFolderPanel';
+import { JobDrawer } from './components/JobDrawer';
 import { isBlankProposal } from './lib/blankProposal';
 import { proposalDisplayName } from './lib/proposalName';
 import { triggerSafePrint } from './printUtils';
@@ -146,7 +146,6 @@ export default function App() {
   const [driveToast, setDriveToast] = useState<{ text: string; warn: boolean } | null>(null);
   const driveToastTimer = useRef<number | undefined>(undefined);
   const [pickerFor, setPickerFor] = useState<null | 'save' | 'print'>(null);
-  const [jobFolderOpen, setJobFolderOpen] = useState(false);
   const [filing, setFiling] = useState(false);
   const viewRef = useRef<ViewMode>(currentView);
   viewRef.current = currentView;
@@ -529,7 +528,7 @@ export default function App() {
   const totalWizardSteps = proposal.categories.length + 3;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1c2324] via-[#14191a] to-[#0e1213] flex flex-col font-sans selection:bg-slate-700 selection:text-slate-100">
+    <div className="pl-[30px] print:pl-0 min-h-screen bg-slate-950 text-slate-100 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1c2324] via-[#14191a] to-[#0e1213] flex flex-col font-sans selection:bg-slate-700 selection:text-slate-100">
       
       {/* Top Fixed Header */}
       <Header
@@ -541,7 +540,6 @@ export default function App() {
         onSaveToDrive={() => void fileToDrive(false)}
         onPrint={() => void fileToDrive(true)}
         isSaved={isSaved}
-        onOpenJobFolder={driveConfigured ? () => setJobFolderOpen(true) : undefined}
         onUpdateFromExcel={
           isBlankProposal(proposal)
             ? undefined
@@ -871,9 +869,7 @@ export default function App() {
           {driveToast.text}
         </div>
       )}
-      {jobFolderOpen && (
-        <JobFolderPanel job={proposal.driveJob ?? null} onPickJob={(j) => rememberJob(j)} onClose={() => setJobFolderOpen(false)} />
-      )}
+      <JobDrawer job={proposal.driveJob ?? null} onPickJob={(j) => rememberJob(j)} />
       {pickerFor && (
         <DriveJobPicker
           title={pickerFor === 'print' ? 'Which job is this proposal for?' : 'Which job should this proposal be saved to?'}
