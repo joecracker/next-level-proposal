@@ -24,6 +24,7 @@ import { CategoryModal } from './components/CategoryModal';
 import { HowToView } from './components/HowToView';
 import { BackupMenu } from './components/BackupMenu';
 import { DriveJobPicker } from './components/DriveJobPicker';
+import { JobFolderPanel } from './components/JobFolderPanel';
 import { isBlankProposal } from './lib/blankProposal';
 import { proposalDisplayName } from './lib/proposalName';
 import { triggerSafePrint } from './printUtils';
@@ -145,6 +146,7 @@ export default function App() {
   const [driveToast, setDriveToast] = useState<{ text: string; warn: boolean } | null>(null);
   const driveToastTimer = useRef<number | undefined>(undefined);
   const [pickerFor, setPickerFor] = useState<null | 'save' | 'print'>(null);
+  const [jobFolderOpen, setJobFolderOpen] = useState(false);
   const [filing, setFiling] = useState(false);
   const viewRef = useRef<ViewMode>(currentView);
   viewRef.current = currentView;
@@ -539,6 +541,7 @@ export default function App() {
         onSaveToDrive={() => void fileToDrive(false)}
         onPrint={() => void fileToDrive(true)}
         isSaved={isSaved}
+        onOpenJobFolder={driveConfigured ? () => setJobFolderOpen(true) : undefined}
         onUpdateFromExcel={
           isBlankProposal(proposal)
             ? undefined
@@ -867,6 +870,9 @@ export default function App() {
         >
           {driveToast.text}
         </div>
+      )}
+      {jobFolderOpen && (
+        <JobFolderPanel job={proposal.driveJob ?? null} onPickJob={(j) => rememberJob(j)} onClose={() => setJobFolderOpen(false)} />
       )}
       {pickerFor && (
         <DriveJobPicker

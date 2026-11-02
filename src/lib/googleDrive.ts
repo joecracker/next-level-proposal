@@ -440,3 +440,16 @@ export async function listFilesByName(
   );
   return rows.map((r) => ({ id: r.id, parents: r.parents || [], modifiedTime: r.modifiedTime }));
 }
+
+export interface DriveFolderFile { id: string; name: string; mimeType: string; modifiedTime: string; webViewLink?: string; isFolder: boolean }
+/** Everything directly inside a folder (files and sub-folders), newest first. */
+export async function listFolderFiles(clientId: string, folderId: string): Promise<DriveFolderFile[]> {
+  const accessToken = await ensureToken(clientId);
+  const q = encodeURIComponent(`'${escQ(folderId)}' in parents and trashed = false`);
+  const rows = await listAllFiles<{ id: string; name: string; mimeType: string; modifiedTime: string; webViewLink?: string }>(
+    accessToken,
+    `https://www.googleapis.com/drive/v3/files?pageSize=100&q=${q}&fields=nextPageToken,files(id,name,mimeType,modifiedTime,webViewLink)`,
+    'folder contents',
+  );
+  return rows.map((r) => ({ ...r, isFolder: r.mimeType === FOLDER_MIME })).sort((a, b) => (a.modifiedTime < b.modifiedTime ? 1 : -1));
+}

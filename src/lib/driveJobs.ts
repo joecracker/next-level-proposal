@@ -7,7 +7,9 @@ import {
   downloadFile,
   saveFileInFolder,
   listFilesByName,
+  listFolderFiles,
   type DriveJobEntry,
+  type DriveFolderFile,
 } from './googleDrive';
 import type { Proposal, ProposalDriveJob } from '../types';
 
@@ -102,3 +104,28 @@ export async function readSavedProposal(fileId: string): Promise<Proposal> {
   if (!p || !p.clientInfo || !Array.isArray(p.categories)) throw new Error('That saved proposal could not be read.');
   return p;
 }
+
+// ---- The job folder as Field & Desk filed it: the job's information, its pictures, and the files in the folder -----------
+export interface JobPhoto { id: string; dataUrl?: string; caption?: string; note?: string; timestamp?: string }
+export interface JobProject {
+  name?: string; customer?: string; phone?: string; email?: string; address?: string; date?: string;
+  jobDesc?: string; jobNotes?: string; scratch?: Array<{ id: string; text: string }>; photos?: JobPhoto[];
+}
+export interface JobFolderInfo { files: DriveFolderFile[]; project: JobProject | null }
+
+/** Lists a job's folder and reads the job file in it (job.json). Nothing is changed in Drive. */
+export async function loadJobFolder(folderId: string): Promise<JobFolderInfo> {
+  const files = await listFolderFiles(CLIENT_ID, folderId);
+  const jf = files.find((f) => !f.isFolder && f.name === 'job.json');
+  let project: JobProject | null = null;
+  if (jf) {
+    try {
+      const parsed = JSON.parse(await (await downloadFile(CLIENT_ID, jf.id)).text());
+      if (parsed && parsed.type === 'nextlevel-job' && parsed.project) project = parsed.project as JobProject;
+    } catch {
+      project = null;
+    }
+  }
+  return { files, project };
+}
+export type { DriveFolderFile };
