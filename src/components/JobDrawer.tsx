@@ -8,8 +8,11 @@ import {
   isDriveConnected,
   connectGoogleDrive,
   loadJobFolder,
+  getJobFileBlob,
   type JobFolderInfo,
   type JobPhoto,
+  type JobProject,
+  type DriveFolderFile,
 } from '../lib/driveJobs';
 import { driveError } from '../lib/driveError';
 import { DriveJobPicker } from './DriveJobPicker';
@@ -18,7 +21,7 @@ import type { ProposalDriveJob } from '../types';
 const PREF_KEY = 'nl.jobdrawer.proposal.v1';
 const MIN_FRAC = 0.2, MAX_FRAC = 0.5, DEFAULT_FRAC = 0.28;
 const clamp = (n: number) => Math.min(MAX_FRAC, Math.max(MIN_FRAC, n));
-type Tab = 'notes' | 'pictures' | 'files';
+type Tab = 'notes' | 'pictures' | 'quotes' | 'files';
 type Pref = { open: boolean; frac: number; back: number; tab: Tab };
 function loadPref(): Pref {
   try {
@@ -28,7 +31,7 @@ function loadPref(): Pref {
       open: Boolean(p.open),
       frac: clamp(Number(p.frac) || DEFAULT_FRAC),
       back: back >= MAX_FRAC - 0.05 ? DEFAULT_FRAC : back,
-      tab: p.tab === 'pictures' || p.tab === 'files' ? p.tab : 'notes',
+      tab: p.tab === 'pictures' || p.tab === 'quotes' || p.tab === 'files' ? p.tab : 'notes',
     };
   } catch {
     return { open: false, frac: DEFAULT_FRAC, back: DEFAULT_FRAC, tab: 'notes' };
@@ -54,6 +57,8 @@ export const JobDrawer: React.FC<JobDrawerProps> = ({ job, onPickJob }) => {
   const [msg, setMsg] = useState<string | null>(null);
   const [big, setBig] = useState<JobPhoto | null>(null);
   const [picking, setPicking] = useState(false);
+  const [viewer, setViewer] = useState<null | { name: string; text?: string; url?: string }>(null);
+  const [fileBusy, setFileBusy] = useState('');
   const drag = useRef<{ startX: number; startW: number; startFrac: number; moved: boolean } | null>(null);
 
   useEffect(() => {
@@ -86,6 +91,7 @@ export const JobDrawer: React.FC<JobDrawerProps> = ({ job, onPickJob }) => {
   useEffect(() => {
     setInfo(null);
     setBig(null);
+    setViewer(null);
     setMsg(null);
   }, [job?.folderId]);
   // Look in the folder when the drawer is open and this job's folder has not been read yet (only when already signed in).
@@ -129,7 +135,8 @@ export const JobDrawer: React.FC<JobDrawerProps> = ({ job, onPickJob }) => {
     if (d && !d.moved) setPref((p) => ({ ...p, open: !p.open }));
   };
 
-  const p = info?.project || null;
+  const hasP = !!info?.project;
+  const p = (info?.project || {}) as JobProject;
   const photos = (p?.photos || []).filter((x) => x.dataUrl);
   const files = (info?.files || []).filter((f) => !f.isFolder && f.name !== 'job.json');
   const folderUrl = job?.folderId ? `https://drive.google.com/drive/folders/${job.folderId}` : null;
@@ -137,7 +144,7 @@ export const JobDrawer: React.FC<JobDrawerProps> = ({ job, onPickJob }) => {
   const tabBtn = (key: Tab, label: string) => (
     <button
       key={key}
-      onClick={() => { setPref((q) => ({ ...q, tab: key })); setBig(null); }}
+      onClick={() => { setPref((q) => ({ ...q, tab: key })); setBig(null); setViewer(null); }}
       style={{ background: 'none', border: 'none', borderBottom: `3px solid ${pref.tab === key ? MOSS : 'transparent'}`, color: pref.tab === key ? MOSS : MUTED, fontWeight: 800, fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 8px 8px', whiteSpace: 'nowrap', cursor: 'pointer' }}
     >
       {label}
@@ -152,6 +159,38 @@ export const JobDrawer: React.FC<JobDrawerProps> = ({ job, onPickJob }) => {
       </div>
     ) : null;
 
+  const kindOf = (f: DriveFolderFile): 'text' | 'image' | 'other' =>
+    /\.(txt|csv|md|log)$/i.test(f.name) || f.mimeType.startsWith('text/') ? 'text' : f.mimeType.startsWith('image/') ? 'image' : 'other';
+  const viewFile = async (f: DriveFolderFile) => {
+    setFileBusy(f.id);
+    try {
+      const blob = await getJobFileBlob(f.id);
+      if (kindOf(f) === 'image') setViewer({ name: f.name, url: URL.createObjectURL(blob) });
+      else {
+        const b = new Uint8Array(await blob.arrayBuffer());
+        const enc = b[0] === 0xff && b[1] === 0xfe ? 'utf-16le' : b[0] === 0xfe && b[1] === 0xff ? 'utf-16be' : 'utf-8';
+        setViewer({ name: f.name, text: new TextDecoder(enc).decode(b) });
+      }
+    } catch (err) {
+      setMsg(driveError(err));
+    }
+    setFileBusy('');
+  };
+  const fileRows = (rows: DriveFolderFile[]) =>
+    rows.length === 0 ? <p style={{ color: MUTED, marginTop: '8px' }}>Nothing here yet.</p> : (
+      <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0 0' }}>
+        {rows.map((f) => (
+          <li key={f.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', padding: '10px 12px', marginBottom: '6px', borderRadius: '8px', background: 'rgba(238,241,238,0.06)', fontSize: '15px' }}>
+            <span style={{ wordBreak: 'break-word', minWidth: 0 }}>{f.name}</span>
+            {kindOf(f) !== 'other' ? (
+              <button onClick={() => void viewFile(f)} disabled={fileBusy === f.id} style={{ background: 'none', border: 'none', color: MOSS, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>{fileBusy === f.id ? '...' : 'View'}</button>
+            ) : f.webViewLink ? (
+              <a href={f.webViewLink} target="_blank" rel="noopener noreferrer" style={{ color: MOSS, fontWeight: 700, flexShrink: 0 }}>Open</a>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    );
   const body = () => {
     if (!job) {
       return (
@@ -170,7 +209,30 @@ export const JobDrawer: React.FC<JobDrawerProps> = ({ job, onPickJob }) => {
         </div>
       );
     }
-    if (!p) return <p style={{ color: MUTED, marginTop: '16px', lineHeight: 1.5 }}>There is no job file in this folder yet, so there are no notes or pictures to show. Save the job to Drive from Field &amp; Desk first.</p>;
+    if (pref.tab === 'quotes') {
+      if (viewer) {
+        return (
+          <div style={{ marginTop: '14px' }}>
+            <button style={btn} onClick={() => setViewer(null)}>{'\u2039'} Back</button>
+            <div style={{ marginTop: '10px', fontWeight: 700, wordBreak: 'break-word' }}>{viewer.name}</div>
+            {viewer.text !== undefined ? (
+              <pre style={{ marginTop: '8px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '14px', lineHeight: 1.5, fontFamily: 'inherit', userSelect: 'text' }}>{viewer.text}</pre>
+            ) : (
+              <img src={viewer.url} alt={viewer.name} style={{ display: 'block', width: '100%', height: 'auto', marginTop: '10px', borderRadius: '8px', background: '#111' }} />
+            )}
+          </div>
+        );
+      }
+      return (
+        <div style={{ marginTop: '6px' }}>
+          {msg && <p style={{ color: '#fca5a5', fontSize: '14px', marginTop: '10px' }}>{msg}</p>}
+          <h3 style={head}>Price quotes</h3>
+          {fileRows(info.quotes)}
+          <h3 style={head}>Receipts</h3>
+          {fileRows(info.receipts)}
+        </div>
+      );
+    }    if (!hasP && pref.tab !== 'files') return <p style={{ color: MUTED, marginTop: '16px', lineHeight: 1.5 }}>There is no job file in this folder yet, so there are no notes or pictures to show. Save the job to Drive from Field &amp; Desk first.</p>;
     if (pref.tab === 'notes') {
       return (
         <>
@@ -251,10 +313,11 @@ export const JobDrawer: React.FC<JobDrawerProps> = ({ job, onPickJob }) => {
       }}
     >
       {pref.open && (
-        <div style={{ height: '100%', overflowY: 'auto', padding: '8px 16px 96px 16px', boxSizing: 'border-box' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-end', borderBottom: '1px solid rgba(238,241,238,0.15)' }}>
+        <div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', padding: '8px 16px 96px 16px', boxSizing: 'border-box' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', borderBottom: '1px solid rgba(238,241,238,0.15)' }}>
             {tabBtn('notes', 'Notes')}
             {tabBtn('pictures', `Pictures${info ? ` (${photos.length})` : ''}`)}
+            {tabBtn('quotes', 'Quotes')}
             {tabBtn('files', 'Files')}
             <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '2px', marginBottom: '6px' }}>
               {job && job.folderId && <button onClick={() => void load()} disabled={busy} title="Look again" style={{ background: 'none', border: 'none', color: MOSS, fontWeight: 700, fontSize: '13px', cursor: 'pointer', minHeight: '36px', padding: '0 8px', whiteSpace: 'nowrap' }}>{busy ? '...' : 'Refresh'}</button>}

@@ -111,7 +111,7 @@ export interface JobProject {
   name?: string; customer?: string; phone?: string; email?: string; address?: string; date?: string;
   jobDesc?: string; jobNotes?: string; scratch?: Array<{ id: string; text: string }>; photos?: JobPhoto[];
 }
-export interface JobFolderInfo { files: DriveFolderFile[]; project: JobProject | null }
+export interface JobFolderInfo { files: DriveFolderFile[]; project: JobProject | null; quotes: DriveFolderFile[]; receipts: DriveFolderFile[] }
 
 /** Lists a job's folder and reads the job file in it (job.json). Nothing is changed in Drive. */
 export async function loadJobFolder(folderId: string): Promise<JobFolderInfo> {
@@ -126,6 +126,15 @@ export async function loadJobFolder(folderId: string): Promise<JobFolderInfo> {
       project = null;
     }
   }
-  return { files, project };
+  // XL files quote sheets and receipts in sub-folders of the job folder (named Price Quotes and Receipts)
+  const sub = async (word: string) => {
+    const fo = files.find((f) => f.isFolder && f.name.toLowerCase().includes(word));
+    return fo ? (await listFolderFiles(CLIENT_ID, fo.id)).filter((f) => !f.isFolder) : [];
+  };
+  const [quotes, receipts] = await Promise.all([sub('quote'), sub('receipt')]);
+  return { files, project, quotes, receipts };
 }
 export type { DriveFolderFile };
+
+/** The bytes of a file in a job folder (a quote sheet, a receipt picture). */
+export const getJobFileBlob = (fileId: string) => downloadFile(CLIENT_ID, fileId);
