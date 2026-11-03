@@ -19,7 +19,7 @@ The Drive button needs **one Google OAuth Client ID**. It's a public identifier 
    - **Authorized JavaScript origins** — add one line per place these apps run, e.g.:
      - `http://localhost:5173` (local dev)
      - `https://nextlevel.crackerbox.app`
-     - `https://proposal-builder.crackerbox.app`
+     - `https://nextlevelproposal.crackerbox.app`
      - `https://fantasy-draft-assistant.crackerbox.app`
      - `https://crackerbox-studio.crackerbox.app`
    - Leave "Authorized redirect URIs" blank — this flow doesn't use redirects.
